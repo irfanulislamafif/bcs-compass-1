@@ -33,14 +33,12 @@ export default function TopicCard({ subjectId, topic }) {
         >
           View Topic
         </Link>
-        <button
-          type="button"
-          disabled
-          title="Practice engine arrives in Stage 3"
-          className="btn-primary flex-1 text-sm cursor-not-allowed opacity-70"
+        <Link
+          to={`/practice/topic/${subjectId}/${topic.id}`}
+          className="btn-primary flex-1 text-sm"
         >
           Practice <ArrowRight className="h-3.5 w-3.5" />
-        </button>
+        </Link>
       </div>
     </div>
   );

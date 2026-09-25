@@ -1,11 +1,11 @@
-import { useParams, Link, Navigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Layers } from 'lucide-react';
-import { getSubjectById } from '../data/demoData.jsx';
-import Breadcrumbs from '../components/Breadcrumbs.jsx';
-import AccuracyBadge from '../components/AccuracyBadge.jsx';
-import ProgressBar from '../components/ProgressBar.jsx';
-import TopicCard from '../components/TopicCard.jsx';
-import EmptyState from '../components/EmptyState.jsx';
+import { useParams, Link, Navigate } from "react-router-dom";
+import { ArrowLeft, BookOpen, Layers } from "lucide-react";
+import { getSubjectById } from "../data/demoData.jsx";
+import Breadcrumbs from "../components/Breadcrumbs.jsx";
+import AccuracyBadge from "../components/AccuracyBadge.jsx";
+import ProgressBar from "../components/ProgressBar.jsx";
+import TopicCard from "../components/TopicCard.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 
 export default function SubjectDetail() {
   const { subjectId } = useParams();
@@ -19,16 +19,15 @@ export default function SubjectDetail() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'Subjects', to: '/subjects' },
+          { label: "Home", to: "/" },
+          { label: "Subjects", to: "/subjects" },
           { label: subject.name },
         ]}
       />
 
       <Link
         to="/subjects"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600 mb-6"
-      >
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600 mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to Subjects
       </Link>
 
@@ -52,16 +51,22 @@ export default function SubjectDetail() {
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           <div>
             <div className="text-xs text-ink-500">Progress</div>
-            <div className="mt-1 text-xl font-semibold">{subject.progress}%</div>
+            <div className="mt-1 text-xl font-semibold">
+              {subject.progress}%
+            </div>
             <ProgressBar value={subject.progress} className="mt-2" />
           </div>
           <div>
             <div className="text-xs text-ink-500">Questions Attempted</div>
-            <div className="mt-1 text-xl font-semibold">{subject.questionsAttempted}</div>
+            <div className="mt-1 text-xl font-semibold">
+              {subject.questionsAttempted}
+            </div>
           </div>
           <div>
             <div className="text-xs text-ink-500">Topics</div>
-            <div className="mt-1 text-xl font-semibold">{subject.topics.length}</div>
+            <div className="mt-1 text-xl font-semibold">
+              {subject.topics.length}
+            </div>
           </div>
         </div>
       </div>
@@ -92,8 +97,8 @@ export default function SubjectDetail() {
       <div className="mt-12 card p-6">
         <h3 className="font-semibold">Study material for this subject</h3>
         <p className="mt-2 text-sm text-ink-500">
-          Notes, previous-question analysis, and AI-generated study material for this
-          subject will arrive in later stages.
+          Notes, previous-question analysis, and AI-generated study material for
+          this subject will arrive in later stages.
         </p>
       </div>
     </div>

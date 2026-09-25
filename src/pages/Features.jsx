@@ -1,21 +1,64 @@
-import { Sparkles, Target, AlertTriangle, TrendingUp, CalendarClock, BarChart3, Brain, FileText } from 'lucide-react';
+import {
+  Sparkles,
+  Target,
+  AlertTriangle,
+  TrendingUp,
+  CalendarClock,
+  BarChart3,
+  Brain,
+  FileText,
+} from "lucide-react";
 
 const items = [
-  { icon: Sparkles, title: 'AI Question Generator', text: 'Generate BCS-style MCQs from your own study material.' },
-  { icon: Target, title: 'Mock Exams', text: 'Timed, exam-style interface with navigation and review.' },
-  { icon: AlertTriangle, title: 'Automatic Mistake Book', text: 'Wrong answers recorded automatically for later review.' },
-  { icon: TrendingUp, title: 'Weak Topic Detection', text: 'Find topics with accuracy below your own average.' },
-  { icon: CalendarClock, title: 'Spaced Revision', text: 'Day 0, 1, 3, 7, 14, 30 revision schedule.' },
-  { icon: BarChart3, title: 'Progress Analytics', text: 'Charts for accuracy, study time, and exam scores.' },
-  { icon: Brain, title: 'AI Written Evaluation', text: 'AI-assisted feedback on written answers.' },
-  { icon: FileText, title: 'PDF Analysis (later)', text: 'Ask questions about your uploaded PDF material.' },
+  {
+    icon: Sparkles,
+    title: "AI Question Generator",
+    text: "Generate BCS-style MCQs from your own study material.",
+  },
+  {
+    icon: Target,
+    title: "Mock Exams",
+    text: "Timed, exam-style interface with navigation and review.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Automatic Mistake Book",
+    text: "Wrong answers recorded automatically for later review.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Weak Topic Detection",
+    text: "Find topics with accuracy below your own average.",
+  },
+  {
+    icon: CalendarClock,
+    title: "Spaced Revision",
+    text: "Day 0, 1, 3, 7, 14, 30 revision schedule.",
+  },
+  {
+    icon: BarChart3,
+    title: "Progress Analytics",
+    text: "Charts for accuracy, study time, and exam scores.",
+  },
+  {
+    icon: Brain,
+    title: "AI Written Evaluation",
+    text: "AI-assisted feedback on written answers.",
+  },
+  {
+    icon: FileText,
+    title: "PDF Analysis (later)",
+    text: "Ask questions about your uploaded PDF material.",
+  },
 ];
 
 export default function Features() {
   return (
     <div className="container-page py-12 md:py-16">
       <div className="max-w-2xl">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Features</h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          Features
+        </h1>
         <p className="mt-3 text-ink-500">
           BCS Compass is designed as a full preparation and examination system.
         </p>
@@ -34,7 +77,8 @@ export default function Features() {
       </div>
 
       <p className="mt-10 text-xs text-ink-500">
-        Features are being implemented in stages. Some features are marked as arriving later.
+        Features are being implemented in stages. Some features are marked as
+        arriving later.
       </p>
     </div>
   );
