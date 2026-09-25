@@ -38,6 +38,16 @@ export default function Footer() {
                   Subjects
                 </Link>
               </li>
+              <li>
+                <Link to="/exam" className="hover:text-brand-600">
+                  Exams
+                </Link>
+              </li>
+              <li>
+                <Link to="/progress" className="hover:text-brand-600">
+                  Progress
+                </Link>
+              </li>
             </ul>
           </div>
 

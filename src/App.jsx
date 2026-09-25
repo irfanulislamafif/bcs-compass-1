@@ -6,11 +6,15 @@ import SubjectDetail from "./pages/SubjectDetail.jsx";
 import TopicDetail from "./pages/TopicDetail.jsx";
 import Practice from "./pages/Practice.jsx";
 import PracticeResult from "./pages/PracticeResult.jsx";
+import ExamBuilder from "./pages/ExamBuilder.jsx";
+import ExamRunner from "./pages/ExamRunner.jsx";
+import ExamResult from "./pages/ExamResult.jsx";
 import Features from "./pages/Features.jsx";
 import HowItWorks from "./pages/HowItWorks.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Progress from "./pages/Progress.jsx";
 
 export default function App() {
   return (
@@ -20,8 +24,9 @@ export default function App() {
         <Route path="/subjects" element={<Subjects />} />
         <Route path="/subjects/:subjectId" element={<SubjectDetail />} />
         <Route path="/topics/:subjectId/:topicId" element={<TopicDetail />} />
+        <Route path="/progress" element={<Progress />} />
 
-        {/* Practice engine */}
+        {/* Practice */}
         <Route
           path="/practice/topic/:subjectId/:topicId"
           element={<Practice />}
@@ -29,6 +34,11 @@ export default function App() {
         <Route path="/practice/subject/:subjectId" element={<Practice />} />
         <Route path="/practice" element={<Practice />} />
         <Route path="/practice/result" element={<PracticeResult />} />
+
+        {/* Exams */}
+        <Route path="/exam" element={<ExamBuilder />} />
+        <Route path="/exam/run" element={<ExamRunner />} />
+        <Route path="/exam/result" element={<ExamResult />} />
 
         <Route path="/features" element={<Features />} />
         <Route path="/how-it-works" element={<HowItWorks />} />

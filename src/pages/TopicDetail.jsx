@@ -1,14 +1,22 @@
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate } from "react-router-dom";
 import {
-  ArrowLeft, BookOpen, ListChecks, FileText, Brain, CalendarClock,
-  Sparkles, PenLine, Target, ArrowRight,
-} from 'lucide-react';
-import { getTopicById } from '../data/demoData.jsx';
-import { getQuestionsByTopic } from '../data/demoQuestions.jsx';
-import Breadcrumbs from '../components/Breadcrumbs.jsx';
-import AccuracyBadge from '../components/AccuracyBadge.jsx';
-import PriorityBadge from '../components/PriorityBadge.jsx';
-import ProgressBar from '../components/ProgressBar.jsx';
+  ArrowLeft,
+  BookOpen,
+  ListChecks,
+  FileText,
+  Brain,
+  CalendarClock,
+  Sparkles,
+  PenLine,
+  Target,
+  ArrowRight,
+} from "lucide-react";
+import { getTopicById } from "../data/demoData.jsx";
+import { getQuestionsByTopic } from "../data/demoQuestions.jsx";
+import Breadcrumbs from "../components/Breadcrumbs.jsx";
+import AccuracyBadge from "../components/AccuracyBadge.jsx";
+import PriorityBadge from "../components/PriorityBadge.jsx";
+import ProgressBar from "../components/ProgressBar.jsx";
 
 function ActionCard({ icon: Icon, title, description, to, comingSoon }) {
   return (
@@ -26,8 +34,7 @@ function ActionCard({ icon: Icon, title, description, to, comingSoon }) {
         <button
           type="button"
           disabled
-          className="btn-secondary mt-4 w-full cursor-not-allowed opacity-70"
-        >
+          className="btn-secondary mt-4 w-full cursor-not-allowed opacity-70">
           {comingSoon}
         </button>
       )}
@@ -50,39 +57,39 @@ export default function TopicDetail() {
   const actions = [
     {
       icon: ListChecks,
-      title: 'Practice MCQ',
+      title: "Practice MCQ",
       description: `Answer ${availableQuestions} MCQs in practice mode with instant feedback.`,
       to: `/practice/topic/${subject.id}/${topic.id}`,
     },
     {
       icon: BookOpen,
-      title: 'Study',
-      description: 'Read structured material for this topic.',
-      comingSoon: 'Coming in Stage 8',
+      title: "Study",
+      description: "Read structured material for this topic.",
+      comingSoon: "Coming in Stage 8",
     },
     {
       icon: Target,
-      title: 'Take Test',
-      description: 'Attempt a timed, exam-style test on this topic.',
-      comingSoon: 'Coming in Stage 4',
+      title: "Take Test",
+      description: "Attempt a timed, exam-style test on this topic.",
+      to: `/exam?subjectId=${subject.id}&topicId=${topic.id}`,
     },
     {
       icon: PenLine,
-      title: 'Written Practice',
-      description: 'Generate and answer written questions for this topic.',
-      comingSoon: 'Coming in Stage 12',
+      title: "Written Practice",
+      description: "Generate and answer written questions for this topic.",
+      comingSoon: "Coming in Stage 12",
     },
     {
       icon: CalendarClock,
-      title: 'Revision',
-      description: 'Add this topic to your spaced revision schedule.',
-      comingSoon: 'Coming in Stage 8',
+      title: "Revision",
+      description: "Add this topic to your spaced revision schedule.",
+      comingSoon: "Coming in Stage 8",
     },
     {
       icon: Sparkles,
-      title: 'AI Generate Questions',
-      description: 'Generate new questions from your own study material.',
-      comingSoon: 'Coming in Stage 10',
+      title: "AI Generate Questions",
+      description: "Generate new questions from your own study material.",
+      comingSoon: "Coming in Stage 10",
     },
   ];
 
@@ -90,8 +97,8 @@ export default function TopicDetail() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'Subjects', to: '/subjects' },
+          { label: "Home", to: "/" },
+          { label: "Subjects", to: "/subjects" },
           { label: subject.name, to: `/subjects/${subject.id}` },
           { label: topic.name },
         ]}
@@ -99,8 +106,7 @@ export default function TopicDetail() {
 
       <Link
         to={`/subjects/${subject.id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600 mb-6"
-      >
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600 mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to {subject.name}
       </Link>
 
@@ -113,9 +119,7 @@ export default function TopicDetail() {
               </h1>
               <PriorityBadge priority={topic.priority} />
             </div>
-            <p className="mt-3 text-sm text-ink-500">
-              {subject.name} · Topic
-            </p>
+            <p className="mt-3 text-sm text-ink-500">{subject.name} · Topic</p>
           </div>
           <AccuracyBadge value={topic.accuracy} />
         </div>
@@ -132,11 +136,15 @@ export default function TopicDetail() {
           </div>
           <div>
             <div className="text-xs text-ink-500">Available Questions</div>
-            <div className="mt-1 text-xl font-semibold">{availableQuestions}</div>
+            <div className="mt-1 text-xl font-semibold">
+              {availableQuestions}
+            </div>
           </div>
           <div>
             <div className="text-xs text-ink-500">Previous Questions</div>
-            <div className="mt-1 text-xl font-semibold">{previousQuestionCount}</div>
+            <div className="mt-1 text-xl font-semibold">
+              {previousQuestionCount}
+            </div>
           </div>
         </div>
       </div>
@@ -147,16 +155,16 @@ export default function TopicDetail() {
           <div>
             <h2 className="font-semibold">Importance</h2>
             <p className="mt-1.5 text-sm text-ink-500">
-              This topic is marked as{' '}
+              This topic is marked as{" "}
               <span className="font-medium text-ink-900">
-                {topic.priority === 'high'
-                  ? 'High Priority'
-                  : topic.priority === 'medium'
-                  ? 'Study'
-                  : 'Low Priority'}
-              </span>{' '}
-              based on its coverage in the BCS syllabus. This is a guideline only —
-              the platform does not recommend skipping any topic.
+                {topic.priority === "high"
+                  ? "High Priority"
+                  : topic.priority === "medium"
+                    ? "Study"
+                    : "Low Priority"}
+              </span>{" "}
+              based on its coverage in the BCS syllabus. This is a guideline
+              only — the platform does not recommend skipping any topic.
             </p>
           </div>
         </div>
