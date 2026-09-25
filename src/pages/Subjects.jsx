@@ -1,23 +1,17 @@
-import { Link } from "react-router-dom";
-import { demoSubjects } from "../data/demoData.jsx";
-import { BookOpen, ArrowRight, Target } from "lucide-react";
-
-function accuracyColor(v) {
-  if (v >= 70) return "text-green-700 bg-green-50";
-  if (v >= 55) return "text-amber-700 bg-amber-50";
-  return "text-red-700 bg-red-50";
-}
+import { Link } from 'react-router-dom';
+import { demoSubjects } from '../data/demoData.jsx';
+import { BookOpen, ArrowRight } from 'lucide-react';
+import AccuracyBadge from '../components/AccuracyBadge.jsx';
+import ProgressBar from '../components/ProgressBar.jsx';
 
 export default function Subjects() {
   return (
     <div className="container-page py-12 md:py-16">
       <div className="max-w-2xl">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Subjects
-        </h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Subjects</h1>
         <p className="mt-3 text-ink-500">
-          Explore the BCS syllabus by subject. Practice questions, track
-          accuracy, and jump into topic-level preparation.
+          Explore the BCS syllabus by subject. Practice questions, track accuracy,
+          and jump into topic-level preparation.
         </p>
       </div>
 
@@ -28,9 +22,7 @@ export default function Subjects() {
               <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center">
                 <BookOpen className="h-5 w-5 text-brand-600" />
               </div>
-              <span className={`badge ${accuracyColor(s.accuracy)}`}>
-                <Target className="h-3 w-3" /> {s.accuracy}% accuracy
-              </span>
+              <AccuracyBadge value={s.accuracy} />
             </div>
 
             <h3 className="mt-4 font-semibold text-lg">{s.name}</h3>
@@ -41,24 +33,15 @@ export default function Subjects() {
                 <span>Progress</span>
                 <span>{s.progress}%</span>
               </div>
-              <div className="h-1.5 rounded-full bg-ink-100 overflow-hidden">
-                <div
-                  className="h-full bg-brand-500"
-                  style={{ width: `${s.progress}%` }}
-                />
-              </div>
+              <ProgressBar value={s.progress} />
               <div className="mt-2 text-xs text-ink-500">
-                {s.questionsAttempted} questions attempted
+                {s.questionsAttempted} questions attempted · {s.topics.length} topics
               </div>
             </div>
 
-            <button
-              type="button"
-              disabled
-              title="Subject detail page arrives in Stage 2"
-              className="btn-secondary mt-5 w-full cursor-not-allowed opacity-70">
-              View Subject · Stage 2
-            </button>
+            <Link to={`/subjects/${s.id}`} className="btn-secondary mt-5 w-full">
+              View Subject <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         ))}
       </div>
@@ -67,8 +50,7 @@ export default function Subjects() {
         <div>
           <h3 className="font-semibold">Ready to start practicing?</h3>
           <p className="text-sm text-ink-500 mt-1">
-            The MCQ practice engine arrives in Stage 3. Create an account to be
-            ready.
+            The MCQ practice engine arrives in Stage 3. Create an account to be ready.
           </p>
         </div>
         <Link to="/register" className="btn-primary">
