@@ -25,7 +25,7 @@ export default function Register() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/progress" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   function onChange(e) {
@@ -43,7 +43,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       await register(form);
-      navigate('/progress', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {

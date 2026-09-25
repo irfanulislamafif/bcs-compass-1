@@ -118,3 +118,25 @@ export function unmarkMistakeUnderstood(questionId) {
   list[idx] = rest;
   write(KEYS.mistakes, list);
 }
+
+import { scheduleRevision } from "./revisionStore.js";
+import { getSubjectById, getTopicById } from "../data/demoData.jsx";
+
+/**
+ * Records a mistake and also schedules the topic for revision
+ * (Day 0, 1, 3, 7, 14, 30).
+ */
+export function recordMistakeWithRevision(entry) {
+  recordMistake(entry);
+
+  const subject = getSubjectById(entry.subjectId);
+  const topic = getTopicById(entry.subjectId, entry.topicId)?.topic;
+  if (subject && topic) {
+    scheduleRevision({
+      subjectId: entry.subjectId,
+      topicId: entry.topicId,
+      subjectName: subject.name,
+      topicName: topic.name,
+    });
+  }
+}

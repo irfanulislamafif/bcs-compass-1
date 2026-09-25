@@ -5,10 +5,13 @@ import { useAuth } from "../contexts/AuthContext.jsx";
 
 const publicLinks = [
   { to: "/", label: "Home" },
-  { to: "/features", label: "Features" },
-  { to: "/how-it-works", label: "How It Works" },
   { to: "/subjects", label: "Subjects" },
+];
+
+const authedLinks = [
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/exam", label: "Exams" },
+  { to: "/revision", label: "Revision" },
   { to: "/mistakes", label: "Mistake Book" },
   { to: "/progress", label: "Progress" },
 ];
@@ -17,6 +20,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+  const links = [...publicLinks, ...(isAuthenticated ? authedLinks : [])];
 
   function handleLogout() {
     logout();
@@ -28,16 +33,17 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-ink-100">
       <div className="container-page">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <Link
+            to={isAuthenticated ? "/dashboard" : "/"}
+            className="flex items-center gap-2">
             <Compass className="h-7 w-7 text-brand-600" strokeWidth={2.2} />
             <span className="text-lg font-bold tracking-tight">
               BCS Compass
             </span>
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {publicLinks.map((l) => (
+            {links.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
@@ -54,7 +60,6 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop auth buttons */}
           <div className="hidden lg:flex items-center gap-2">
             {isAuthenticated ? (
               <>
@@ -83,7 +88,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu toggle */}
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-ink-100"
             onClick={() => setOpen(!open)}
@@ -93,10 +97,9 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile nav */}
         {open && (
           <nav className="lg:hidden border-t border-ink-100 py-3 space-y-1">
-            {publicLinks.map((l) => (
+            {links.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}

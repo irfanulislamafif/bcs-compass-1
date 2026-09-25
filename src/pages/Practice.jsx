@@ -1,24 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Flag,
   ListChecks,
-} from "lucide-react";
-import { buildSession, getQuestionById } from "../data/demoQuestions.jsx";
-import { getSubjectById, getTopicById } from "../data/demoData.jsx";
-import { recordAttempt, recordMistake } from "../lib/sessionStore.js";
-import { getActiveMistakeQuestionIds } from "../lib/progress.js";
-import Breadcrumbs from "../components/Breadcrumbs.jsx";
-import QuestionCard from "../components/QuestionCard.jsx";
-import EmptyState from "../components/EmptyState.jsx";
+} from 'lucide-react';
+import {
+  buildSession,
+  getQuestionById,
+} from '../data/demoQuestions.jsx';
+import { getSubjectById, getTopicById } from '../data/demoData.jsx';
+import {
+  recordAttempt,
+  recordMistakeWithRevision,
+} from '../lib/sessionStore.js';
+import { getActiveMistakeQuestionIds } from '../lib/progress.js';
+import Breadcrumbs from '../components/Breadcrumbs.jsx';
+import QuestionCard from '../components/QuestionCard.jsx';
+import EmptyState from '../components/EmptyState.jsx';
 
 /**
  * Practice modes:
@@ -32,15 +33,15 @@ export default function Practice() {
   const { subjectId: subjFromPath, topicId: topicFromPath } = useParams();
   const [searchParams] = useSearchParams();
 
-  const subjectId = subjFromPath || searchParams.get("subjectId") || undefined;
-  const topicId = topicFromPath || searchParams.get("topicId") || undefined;
-  const difficulty = searchParams.get("difficulty") || "any";
-  const limit = Number(searchParams.get("limit") || 10);
-  const mode = searchParams.get("mode") || "normal";
+  const subjectId = subjFromPath || searchParams.get('subjectId') || undefined;
+  const topicId = topicFromPath || searchParams.get('topicId') || undefined;
+  const difficulty = searchParams.get('difficulty') || 'any';
+  const limit = Number(searchParams.get('limit') || 10);
+  const mode = searchParams.get('mode') || 'normal';
 
   /* ------- Build session once on mount ------- */
   const questions = useMemo(() => {
-    if (mode === "mistakes") {
+    if (mode === 'mistakes') {
       const ids = getActiveMistakeQuestionIds();
       const list = ids.map((id) => getQuestionById(id)).filter(Boolean);
       return list.sort(() => Math.random() - 0.5);
@@ -78,7 +79,7 @@ export default function Practice() {
 
     setRevealed((prev) => ({ ...prev, [index]: true }));
 
-    // Persist attempt + mistake
+    // Persist attempt + mistake (and auto-schedule revision)
     const attempt = {
       questionId: current.id,
       subjectId: current.subjectId,
@@ -90,7 +91,7 @@ export default function Practice() {
     recordAttempt(attempt);
 
     if (!correct) {
-      recordMistake({
+      recordMistakeWithRevision({
         questionId: current.id,
         subjectId: current.subjectId,
         topicId: current.topicId,
@@ -116,7 +117,7 @@ export default function Practice() {
         isCorrect: selected === q.answer,
       };
     });
-    navigate("/practice/result", {
+    navigate('/practice/result', {
       state: { results, timeSpentMs, subjectId, topicId },
       replace: true,
     });
@@ -124,7 +125,7 @@ export default function Practice() {
 
   /* ------- Empty state ------- */
   if (total === 0) {
-    if (mode === "mistakes") {
+    if (mode === 'mistakes') {
       return (
         <div className="container-page py-12">
           <EmptyState
@@ -161,14 +162,14 @@ export default function Practice() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: "Home", to: "/" },
-          ...(mode === "mistakes"
+          { label: 'Home', to: '/' },
+          ...(mode === 'mistakes'
             ? [
-                { label: "Mistake Book", to: "/mistakes" },
-                { label: "Practice Mistakes" },
+                { label: 'Mistake Book', to: '/mistakes' },
+                { label: 'Practice Mistakes' },
               ]
             : [
-                { label: "Subjects", to: "/subjects" },
+                { label: 'Subjects', to: '/subjects' },
                 subject
                   ? { label: subject.name, to: `/subjects/${subject.id}` }
                   : null,
@@ -178,7 +179,7 @@ export default function Practice() {
                       to: `/topics/${subject.id}/${topic.id}`,
                     }
                   : null,
-                { label: "Practice" },
+                { label: 'Practice' },
               ].filter(Boolean)),
         ]}
       />
@@ -187,12 +188,13 @@ export default function Practice() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600">
+          className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600"
+        >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
 
         <div className="text-sm text-ink-500">
-          {mode === "mistakes" ? "Mistakes Practice" : "Practice Mode"} ·{" "}
+          {mode === 'mistakes' ? 'Mistakes Practice' : 'Practice Mode'} ·{' '}
           {Object.keys(answers).length}/{total} answered
         </div>
       </div>
@@ -215,7 +217,8 @@ export default function Practice() {
               type="button"
               onClick={goPrev}
               disabled={index === 0}
-              className="btn-secondary">
+              className="btn-secondary"
+            >
               <ArrowLeft className="h-4 w-4" /> Previous
             </button>
 
@@ -224,7 +227,8 @@ export default function Practice() {
                 type="button"
                 onClick={handleCheck}
                 disabled={answers[index] == null}
-                className="btn-primary">
+                className="btn-primary"
+              >
                 <CheckCircle2 className="h-4 w-4" /> Check Answer
               </button>
             ) : isLast ? (
@@ -243,7 +247,8 @@ export default function Practice() {
               <button
                 type="button"
                 onClick={finish}
-                className="text-sm text-ink-500 hover:text-brand-600 underline underline-offset-2">
+                className="text-sm text-ink-500 hover:text-brand-600 underline underline-offset-2"
+              >
                 Finish early and see results
               </button>
             </div>
@@ -262,18 +267,13 @@ export default function Practice() {
                 revealed[i] && answers[i] != null && answers[i] !== q.answer;
 
               let cls =
-                "h-9 w-9 rounded-md border text-xs font-medium flex items-center justify-center transition-colors ";
-              if (wasCorrect)
-                cls += "bg-green-100 border-green-300 text-green-800";
-              else if (wasWrong)
-                cls += "bg-red-100 border-red-300 text-red-800";
-              else if (answered)
-                cls += "bg-brand-100 border-brand-300 text-brand-800";
-              else
-                cls +=
-                  "bg-white border-ink-200 text-ink-700 hover:border-brand-300";
+                'h-9 w-9 rounded-md border text-xs font-medium flex items-center justify-center transition-colors ';
+              if (wasCorrect) cls += 'bg-green-100 border-green-300 text-green-800';
+              else if (wasWrong) cls += 'bg-red-100 border-red-300 text-red-800';
+              else if (answered) cls += 'bg-brand-100 border-brand-300 text-brand-800';
+              else cls += 'bg-white border-ink-200 text-ink-700 hover:border-brand-300';
 
-              if (isCurrent) cls += " ring-2 ring-brand-500 ring-offset-1";
+              if (isCurrent) cls += ' ring-2 ring-brand-500 ring-offset-1';
 
               return (
                 <button
@@ -281,7 +281,8 @@ export default function Practice() {
                   type="button"
                   onClick={() => setIndex(i)}
                   className={cls}
-                  aria-label={`Go to question ${i + 1}`}>
+                  aria-label={`Go to question ${i + 1}`}
+                >
                   {i + 1}
                 </button>
               );

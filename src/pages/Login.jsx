@@ -13,7 +13,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const redirectTo = location.state?.from?.pathname || '/progress';
+  const redirectTo = location.state?.from?.pathname || '/dashboard';
 
   if (booting) {
     return (
