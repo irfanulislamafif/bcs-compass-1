@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
+import aiRoutes from "./routes/ai.js";
 
 dotenv.config();
 
@@ -27,6 +28,12 @@ const authLimiter = rateLimit({
 });
 app.use("/api/auth", authLimiter);
 
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { message: "Too many AI requests. Please wait a moment." },
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
@@ -36,6 +43,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/ai", aiLimiter, aiRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ message: "Not found" });

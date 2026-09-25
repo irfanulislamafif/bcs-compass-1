@@ -16,6 +16,7 @@ import Progress from "./pages/Progress.jsx";
 import MistakeBook from "./pages/MistakeBook.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Revision from "./pages/Revision.jsx";
+import AIStudyLab from "./pages/AIStudyLab.jsx";
 import Features from "./pages/Features.jsx";
 import HowItWorks from "./pages/HowItWorks.jsx";
 import Login from "./pages/Login.jsx";
@@ -57,6 +58,15 @@ export default function App() {
               </P>
             }
           />
+          <Route
+            path="/ai-lab"
+            element={
+              <P>
+                <AIStudyLab />
+              </P>
+            }
+          />
+
           <Route
             path="/practice/topic/:subjectId/:topicId"
             element={

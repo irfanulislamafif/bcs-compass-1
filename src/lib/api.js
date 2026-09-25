@@ -3,12 +3,12 @@
  * Automatically attaches access token and refreshes it if expired.
  */
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = "http://localhost:5000/api";
 
 const STORAGE_KEYS = {
-  access: 'bcs_compass_access_token',
-  refresh: 'bcs_compass_refresh_token',
-  user: 'bcs_compass_user',
+  access: "bcs_compass_access_token",
+  refresh: "bcs_compass_refresh_token",
+  user: "bcs_compass_user",
 };
 
 /* ---------- Token storage ---------- */
@@ -40,8 +40,11 @@ export function clearAuth() {
 
 /* ---------- Core request helper ---------- */
 
-async function request(path, { method = 'GET', body, auth = true, retry = true } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+async function request(
+  path,
+  { method = "GET", body, auth = true, retry = true } = {},
+) {
+  const headers = { "Content-Type": "application/json" };
 
   if (auth) {
     const token = getAccessToken();
@@ -61,7 +64,7 @@ async function request(path, { method = 'GET', body, auth = true, retry = true }
       return request(path, { method, body, auth, retry: false });
     }
     clearAuth();
-    throw new Error('Your session has expired. Please log in again.');
+    throw new Error("Your session has expired. Please log in again.");
   }
 
   /* Parse JSON safely */
@@ -76,8 +79,8 @@ async function request(path, { method = 'GET', body, auth = true, retry = true }
     const msg =
       data?.message ||
       (res.status === 0
-        ? 'Unable to reach the server. Please try again.'
-        : 'Something went wrong. Please try again.');
+        ? "Unable to reach the server. Please try again."
+        : "Something went wrong. Please try again.");
     throw new Error(msg);
   }
 
@@ -97,8 +100,8 @@ async function tryRefresh() {
   refreshPromise = (async () => {
     try {
       const res = await fetch(`${BASE_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
       if (!res.ok) return false;
@@ -122,12 +125,27 @@ async function tryRefresh() {
 
 export const authApi = {
   register: (payload) =>
-    request('/auth/register', { method: 'POST', body: payload, auth: false }),
+    request("/auth/register", { method: "POST", body: payload, auth: false }),
   login: (payload) =>
-    request('/auth/login', { method: 'POST', body: payload, auth: false }),
-  me: () => request('/auth/me'),
+    request("/auth/login", { method: "POST", body: payload, auth: false }),
+  me: () => request("/auth/me"),
 };
 
 export const healthApi = {
-  check: () => request('/health', { auth: false }),
+  check: () => request("/health", { auth: false }),
+};
+
+export const aiApi = {
+  analyze: (payload) =>
+    request("/ai/analyze", { method: "POST", body: payload }),
+  mcq: (payload) => request("/ai/mcq", { method: "POST", body: payload }),
+  written: (payload) =>
+    request("/ai/written", { method: "POST", body: payload }),
+  flashcards: (payload) =>
+    request("/ai/flashcards", { method: "POST", body: payload }),
+  notes: (payload) => request("/ai/notes", { method: "POST", body: payload }),
+  facts: (payload) => request("/ai/facts", { method: "POST", body: payload }),
+  memorize: (payload) =>
+    request("/ai/memorize", { method: "POST", body: payload }),
+  history: () => request("/ai/history"),
 };

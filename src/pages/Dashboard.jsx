@@ -1,29 +1,34 @@
-import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
-  Sparkles, Target, ListChecks, AlertTriangle, Trophy, Clock, CalendarClock,
-  ArrowRight, BookOpen, Brain, TrendingUp,
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import ProgressBar from '../components/ProgressBar.jsx';
-import StatCard from '../components/StatCard.jsx';
+  Sparkles,
+  Target,
+  ListChecks,
+  AlertTriangle,
+  Trophy,
+  Clock,
+  CalendarClock,
+  ArrowRight,
+  BookOpen,
+  Brain,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import ProgressBar from "../components/ProgressBar.jsx";
+import StatCard from "../components/StatCard.jsx";
 import {
   getOverallStats,
   getSubjectStats,
   getWeakTopics,
   getExamHistory,
-} from '../lib/progress.js';
-import {
-  getDueToday,
-  getRevisionCounts,
-} from '../lib/revisionStore.js';
-import { getMistakeCounts } from '../lib/progress.js';
+  getMistakeCounts,
+} from "../lib/progress.js";
+import { getDueToday, getRevisionCounts } from "../lib/revisionStore.js";
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 export default function Dashboard() {
@@ -39,8 +44,7 @@ export default function Dashboard() {
 
   const recentExams = exams.slice(0, 4);
   const topSubjects = subjects.filter((s) => s.total > 0).slice(0, 5);
-
-  const firstName = (user?.name || 'aspirant').split(' ')[0];
+  const firstName = (user?.name || "aspirant").split(" ")[0];
 
   return (
     <div className="container-page py-10 md:py-14">
@@ -49,30 +53,28 @@ export default function Dashboard() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           {greeting()}, {firstName}!
         </h1>
-        <p className="mt-2 text-ink-500">
-          Ready for today&apos;s preparation?
-        </p>
+        <p className="mt-2 text-ink-500">Ready for today&apos;s preparation?</p>
       </div>
 
       {/* Quick actions */}
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           to="/subjects"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow"
-        >
+          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
           <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
             <BookOpen className="h-5 w-5 text-brand-600" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm">Start Practice</div>
-            <div className="text-xs text-ink-500">Browse subjects & topics</div>
+            <div className="text-xs text-ink-500">
+              Browse subjects &amp; topics
+            </div>
           </div>
         </Link>
 
         <Link
           to="/exam"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow"
-        >
+          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
           <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
             <Trophy className="h-5 w-5 text-brand-600" />
           </div>
@@ -84,8 +86,7 @@ export default function Dashboard() {
 
         <Link
           to="/mistakes"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow"
-        >
+          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
           <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
             <AlertTriangle className="h-5 w-5 text-red-600" />
           </div>
@@ -99,14 +100,13 @@ export default function Dashboard() {
 
         <Link
           to="/ai-lab"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow"
-        >
+          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
           <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
             <Brain className="h-5 w-5 text-brand-600" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm">AI Study Lab</div>
-            <div className="text-xs text-ink-500">Coming soon</div>
+            <div className="text-xs text-ink-500">Generate from your notes</div>
           </div>
         </Link>
       </div>
@@ -124,10 +124,7 @@ export default function Dashboard() {
               Answer at least <strong>20 questions</strong> in practice mode to
               keep momentum.
             </p>
-            <Link
-              to="/subjects"
-              className="btn-secondary mt-4 w-full text-sm"
-            >
+            <Link to="/subjects" className="btn-secondary mt-4 w-full text-sm">
               Start Practice
             </Link>
           </div>
@@ -140,9 +137,9 @@ export default function Dashboard() {
             <p className="text-sm text-ink-500">
               {revisionCounts.due > 0
                 ? `${revisionCounts.due} topic${
-                    revisionCounts.due === 1 ? '' : 's'
+                    revisionCounts.due === 1 ? "" : "s"
                   } due today.`
-                : 'Nothing due today — great job!'}
+                : "Nothing due today — great job!"}
             </p>
             <Link to="/revision" className="btn-secondary mt-4 w-full text-sm">
               Open Revision
@@ -157,14 +154,11 @@ export default function Dashboard() {
             <p className="text-sm text-ink-500">
               {weak.length > 0
                 ? `${weak.length} weak topic${
-                    weak.length === 1 ? '' : 's'
+                    weak.length === 1 ? "" : "s"
                   } detected.`
-                : 'No weak topics detected yet.'}
+                : "No weak topics detected yet."}
             </p>
-            <Link
-              to="/progress"
-              className="btn-secondary mt-4 w-full text-sm"
-            >
+            <Link to="/progress" className="btn-secondary mt-4 w-full text-sm">
               View Progress
             </Link>
           </div>
@@ -194,7 +188,7 @@ export default function Dashboard() {
             sub={
               recentExams[0]
                 ? `Last: ${recentExams[0].accuracy}%`
-                : 'No exams yet'
+                : "No exams yet"
             }
           />
           <StatCard
@@ -213,8 +207,7 @@ export default function Dashboard() {
             <h2 className="font-semibold">Subject Progress</h2>
             <Link
               to="/subjects"
-              className="text-sm text-brand-600 hover:underline inline-flex items-center gap-1"
-            >
+              className="text-sm text-brand-600 hover:underline inline-flex items-center gap-1">
               All subjects <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -230,8 +223,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between text-sm mb-1.5">
                     <Link
                       to={`/subjects/${s.subjectId}`}
-                      className="font-medium hover:text-brand-600"
-                    >
+                      className="font-medium hover:text-brand-600">
                       {s.name}
                     </Link>
                     <span className="text-ink-500">
@@ -277,8 +269,7 @@ export default function Dashboard() {
                     <ProgressBar value={t.accuracy} className="mt-1.5" />
                     <Link
                       to={`/practice/topic/${t.subjectId}/${t.topicId}`}
-                      className="text-xs text-brand-600 hover:underline inline-flex items-center gap-1 mt-2"
-                    >
+                      className="text-xs text-brand-600 hover:underline inline-flex items-center gap-1 mt-2">
                       Practice now <ArrowRight className="h-3 w-3" />
                     </Link>
                   </li>
@@ -302,7 +293,9 @@ export default function Dashboard() {
                 {dueRevisions.slice(0, 4).map((r) => (
                   <li key={r.id} className="flex justify-between text-sm gap-2">
                     <span className="truncate">{r.topicName}</span>
-                    <span className="text-brand-600 shrink-0">Day {r.intervalDays}</span>
+                    <span className="text-brand-600 shrink-0">
+                      Day {r.intervalDays}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -320,8 +313,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold">Recent Exams</h2>
           <Link
             to="/progress"
-            className="text-sm text-brand-600 hover:underline inline-flex items-center gap-1"
-          >
+            className="text-sm text-brand-600 hover:underline inline-flex items-center gap-1">
             View all <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -359,12 +351,11 @@ export default function Dashboard() {
                       <span
                         className={`badge ${
                           e.accuracy >= 70
-                            ? 'bg-green-50 text-green-700'
+                            ? "bg-green-50 text-green-700"
                             : e.accuracy >= 55
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-red-50 text-red-700'
-                        }`}
-                      >
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-red-50 text-red-700"
+                        }`}>
                         {e.accuracy}%
                       </span>
                     </td>

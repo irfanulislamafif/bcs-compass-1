@@ -197,7 +197,7 @@ export function getMistakesSummary() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mistake Book helpers (Stage 6)                                    */
+/*  Mistake Book helpers                                              */
 /* ------------------------------------------------------------------ */
 
 export function getMistakeEntries({
