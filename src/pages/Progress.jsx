@@ -259,11 +259,20 @@ export default function Progress() {
                   <p className="text-xs text-ink-500 mt-1">
                     Questions recorded for review
                   </p>
-                  <Link
-                    to="/mistakes"
-                    className="btn-secondary mt-4 w-full text-sm">
-                    Open Mistake Book
-                  </Link>
+                  <div className="mt-4 space-y-2">
+                    <Link
+                      to="/mistakes"
+                      className="btn-secondary w-full text-sm">
+                      Open Mistake Book
+                    </Link>
+                    {mistakes.total > 0 && (
+                      <Link
+                        to="/practice?mode=mistakes"
+                        className="btn-primary w-full text-sm">
+                        Practice Mistakes
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,5 +1,14 @@
-import { getAttempts, getMistakes, getExamAttempts } from './sessionStore.js';
-import { demoSubjects, getSubjectById, getTopicById } from '../data/demoData.jsx';
+import {
+  getAttempts,
+  getMistakes as _getMistakes,
+  getExamAttempts,
+} from './sessionStore.js';
+import {
+  demoSubjects,
+  getSubjectById,
+  getTopicById,
+} from '../data/demoData.jsx';
+import { getQuestionById } from '../data/demoQuestions.jsx';
 
 /* ------------------------------------------------------------------ */
 /*  Overall stats                                                     */
@@ -17,8 +26,6 @@ export function getOverallStats() {
 
   const examsCompleted = exams.length;
 
-  // Study time: sum of exam durations + estimated time for practice attempts
-  // (we assume 30 seconds per practice attempt if no per-question timing)
   const examTimeMs = exams.reduce((s, e) => s + (e.timeSpentMs || 0), 0);
   const practiceTimeMs = attempts.length * 30 * 1000;
   const studyTimeMs = examTimeMs + practiceTimeMs;
@@ -51,9 +58,10 @@ export function getSubjectStats() {
       total,
       correct,
       accuracy,
-      // progress is a derived metric: % of demo questions attempted
-      // (capped at 100) — will be backend-driven later
-      progress: Math.min(100, Math.round((total / Math.max(1, s.questionsAttempted)) * 100)),
+      progress: Math.min(
+        100,
+        Math.round((total / Math.max(1, s.questionsAttempted)) * 100)
+      ),
     };
   });
 }
@@ -94,15 +102,9 @@ export function getTopicStats() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Weak topics                                                       */
+/*  Weak / strong topics                                              */
 /* ------------------------------------------------------------------ */
 
-/**
- * A topic is weak when:
- *  - at least `minAttempts` questions attempted (avoid noise)
- *  - accuracy is below `threshold` (default 60%)
- * Sorted by accuracy ascending, then attempts descending.
- */
 export function getWeakTopics({ minAttempts = 3, threshold = 60 } = {}) {
   return getTopicStats()
     .filter((t) => t.total >= minAttempts && t.accuracy < threshold)
@@ -130,7 +132,7 @@ export function getRecentActivity({ days = 14 } = {}) {
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+    const key = d.toISOString().slice(0, 10);
     buckets[key] = { date: key, attempts: 0, correct: 0 };
   }
 
@@ -145,7 +147,7 @@ export function getRecentActivity({ days = 14 } = {}) {
   return Object.values(buckets).map((b) => ({
     ...b,
     accuracy: b.attempts ? Math.round((b.correct / b.attempts) * 100) : 0,
-    label: b.date.slice(5), // MM-DD
+    label: b.date.slice(5),
   }));
 }
 
@@ -177,7 +179,7 @@ export function getExamHistory() {
 /* ------------------------------------------------------------------ */
 
 export function getMistakesSummary() {
-  const mistakes = getMistakes();
+  const mistakes = _getMistakes().filter((m) => !m.understoodAt);
   const bySubject = {};
   const byTopic = {};
 
@@ -192,4 +194,65 @@ export function getMistakesSummary() {
     bySubject,
     byTopic,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mistake Book helpers (Stage 6)                                    */
+/* ------------------------------------------------------------------ */
+
+export function getMistakeEntries({
+  status = 'active',
+  subjectId,
+  topicId,
+} = {}) {
+  let list = _getMistakes();
+
+  if (status === 'active') {
+    list = list.filter((m) => !m.understoodAt);
+  } else if (status === 'understood') {
+    list = list.filter((m) => !!m.understoodAt);
+  }
+
+  if (subjectId) list = list.filter((m) => m.subjectId === subjectId);
+  if (topicId) list = list.filter((m) => m.topicId === topicId);
+
+  const enriched = list
+    .map((m) => {
+      const q = getQuestionById(m.questionId);
+      if (!q) return null;
+      const subject = getSubjectById(m.subjectId);
+      const topic = getTopicById(m.subjectId, m.topicId)?.topic;
+      return {
+        ...m,
+        question: q,
+        subjectName: subject?.name || m.subjectId,
+        topicName: topic?.name || m.topicId,
+      };
+    })
+    .filter(Boolean);
+
+  return enriched.sort((a, b) => (b.at || 0) - (a.at || 0));
+}
+
+export function getMistakeCounts() {
+  const list = _getMistakes();
+  const active = list.filter((m) => !m.understoodAt);
+  const understood = list.filter((m) => !!m.understoodAt);
+  const bySubject = {};
+  for (const m of active) {
+    bySubject[m.subjectId] = (bySubject[m.subjectId] || 0) + 1;
+  }
+  return {
+    total: list.length,
+    active: active.length,
+    understood: understood.length,
+    bySubject,
+  };
+}
+
+/** Returns question IDs the user should practice (active mistakes). */
+export function getActiveMistakeQuestionIds() {
+  return _getMistakes()
+    .filter((m) => !m.understoodAt)
+    .map((m) => m.questionId);
 }

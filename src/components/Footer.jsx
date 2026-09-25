@@ -48,6 +48,11 @@ export default function Footer() {
                   Progress
                 </Link>
               </li>
+              <li>
+                <Link to="/mistakes" className="hover:text-brand-600">
+                  Mistake Book
+                </Link>
+              </li>
             </ul>
           </div>
 

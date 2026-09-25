@@ -96,3 +96,25 @@ export function getExamAttempts() {
 export function clearExamAttempts() {
   write(EXAMS_KEY, []);
 }
+/* ---------- Mistakes — enrichment helpers ---------- */
+
+/**
+ * Marks a mistake as "understood". We keep it in the list but with an
+ * `understoodAt` timestamp, so we can filter it out later.
+ */
+export function markMistakeUnderstood(questionId) {
+  const list = getMistakes();
+  const idx = list.findIndex((m) => m.questionId === questionId);
+  if (idx === -1) return;
+  list[idx] = { ...list[idx], understoodAt: Date.now() };
+  write(KEYS.mistakes, list);
+}
+
+export function unmarkMistakeUnderstood(questionId) {
+  const list = getMistakes();
+  const idx = list.findIndex((m) => m.questionId === questionId);
+  if (idx === -1) return;
+  const { understoodAt, ...rest } = list[idx];
+  list[idx] = rest;
+  write(KEYS.mistakes, list);
+}

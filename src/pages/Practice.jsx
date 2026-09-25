@@ -12,13 +12,10 @@ import {
   Flag,
   ListChecks,
 } from "lucide-react";
-import {
-  buildSession,
-  getQuestionsByTopic,
-  getQuestionsBySubject,
-} from "../data/demoQuestions.jsx";
+import { buildSession, getQuestionById } from "../data/demoQuestions.jsx";
 import { getSubjectById, getTopicById } from "../data/demoData.jsx";
 import { recordAttempt, recordMistake } from "../lib/sessionStore.js";
+import { getActiveMistakeQuestionIds } from "../lib/progress.js";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
 import QuestionCard from "../components/QuestionCard.jsx";
 import EmptyState from "../components/EmptyState.jsx";
@@ -27,6 +24,7 @@ import EmptyState from "../components/EmptyState.jsx";
  * Practice modes:
  *  - /practice/topic/:subjectId/:topicId   → practice a topic
  *  - /practice/subject/:subjectId          → practice a subject (mixed topics)
+ *  - /practice?mode=mistakes               → practice active mistakes
  *  - /practice?limit=10&subjectId=&topicId=&difficulty=
  */
 export default function Practice() {
@@ -38,13 +36,18 @@ export default function Practice() {
   const topicId = topicFromPath || searchParams.get("topicId") || undefined;
   const difficulty = searchParams.get("difficulty") || "any";
   const limit = Number(searchParams.get("limit") || 10);
+  const mode = searchParams.get("mode") || "normal";
 
   /* ------- Build session once on mount ------- */
-  const questions = useMemo(
-    () => buildSession({ subjectId, topicId, difficulty, limit }),
+  const questions = useMemo(() => {
+    if (mode === "mistakes") {
+      const ids = getActiveMistakeQuestionIds();
+      const list = ids.map((id) => getQuestionById(id)).filter(Boolean);
+      return list.sort(() => Math.random() - 0.5);
+    }
+    return buildSession({ subjectId, topicId, difficulty, limit });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [subjectId, topicId, difficulty, limit],
-  );
+  }, [mode, subjectId, topicId, difficulty, limit]);
 
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { [questionIndex]: selectedOption }
@@ -105,7 +108,6 @@ export default function Practice() {
 
   function finish() {
     const timeSpentMs = Date.now() - startedAt;
-    // Pass results to the result page via navigation state.
     const results = questions.map((q, i) => {
       const selected = answers[i] ?? null;
       return {
@@ -122,6 +124,22 @@ export default function Practice() {
 
   /* ------- Empty state ------- */
   if (total === 0) {
+    if (mode === "mistakes") {
+      return (
+        <div className="container-page py-12">
+          <EmptyState
+            icon={CheckCircle2}
+            title="No active mistakes to practice"
+            description="Either you haven't gotten any questions wrong yet, or you've marked all your mistakes as understood. Great work!"
+            action={
+              <Link to="/mistakes" className="btn-primary">
+                Open Mistake Book
+              </Link>
+            }
+          />
+        </div>
+      );
+    }
     return (
       <div className="container-page py-12">
         <EmptyState
@@ -144,15 +162,25 @@ export default function Practice() {
       <Breadcrumbs
         items={[
           { label: "Home", to: "/" },
-          { label: "Subjects", to: "/subjects" },
-          subject
-            ? { label: subject.name, to: `/subjects/${subject.id}` }
-            : null,
-          topic
-            ? { label: topic.name, to: `/topics/${subject.id}/${topic.id}` }
-            : null,
-          { label: "Practice" },
-        ].filter(Boolean)}
+          ...(mode === "mistakes"
+            ? [
+                { label: "Mistake Book", to: "/mistakes" },
+                { label: "Practice Mistakes" },
+              ]
+            : [
+                { label: "Subjects", to: "/subjects" },
+                subject
+                  ? { label: subject.name, to: `/subjects/${subject.id}` }
+                  : null,
+                topic
+                  ? {
+                      label: topic.name,
+                      to: `/topics/${subject.id}/${topic.id}`,
+                    }
+                  : null,
+                { label: "Practice" },
+              ].filter(Boolean)),
+        ]}
       />
 
       <div className="flex items-center justify-between mb-6">
@@ -164,7 +192,8 @@ export default function Practice() {
         </button>
 
         <div className="text-sm text-ink-500">
-          Practice Mode · {Object.keys(answers).length}/{total} answered
+          {mode === "mistakes" ? "Mistakes Practice" : "Practice Mode"} ·{" "}
+          {Object.keys(answers).length}/{total} answered
         </div>
       </div>
 

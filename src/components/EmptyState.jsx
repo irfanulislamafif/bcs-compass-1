@@ -8,7 +8,9 @@ export default function EmptyState({ icon: Icon, title, description, action }) {
       )}
       <h3 className="mt-4 font-semibold">{title}</h3>
       {description && (
-        <p className="mt-2 text-sm text-ink-500 max-w-md mx-auto">{description}</p>
+        <p className="mt-2 text-sm text-ink-500 max-w-md mx-auto">
+          {description}
+        </p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>

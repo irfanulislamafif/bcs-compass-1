@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 
 /**
  * items: [{ label, to? }]
@@ -18,7 +18,9 @@ export default function Breadcrumbs({ items = [] }) {
                   {item.label}
                 </Link>
               ) : (
-                <span className={last ? 'text-ink-900 font-medium' : ''}>{item.label}</span>
+                <span className={last ? "text-ink-900 font-medium" : ""}>
+                  {item.label}
+                </span>
               )}
               {!last && <ChevronRight className="h-3.5 w-3.5 text-ink-300" />}
             </li>

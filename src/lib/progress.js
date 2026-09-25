@@ -1,5 +1,14 @@
-import { getAttempts, getMistakes, getExamAttempts } from './sessionStore.js';
-import { demoSubjects, getSubjectById, getTopicById } from '../data/demoData.jsx';
+import {
+  getAttempts,
+  getMistakes as _getMistakes,
+  getExamAttempts,
+} from "./sessionStore.js";
+import {
+  demoSubjects,
+  getSubjectById,
+  getTopicById,
+} from "../data/demoData.jsx";
+import { getQuestionById } from "../data/demoQuestions.jsx";
 
 /* ------------------------------------------------------------------ */
 /*  Overall stats                                                     */
@@ -49,7 +58,10 @@ export function getSubjectStats() {
       total,
       correct,
       accuracy,
-      progress: Math.min(100, Math.round((total / Math.max(1, s.questionsAttempted)) * 100)),
+      progress: Math.min(
+        100,
+        Math.round((total / Math.max(1, s.questionsAttempted)) * 100),
+      ),
     };
   });
 }
@@ -147,7 +159,7 @@ export function getExamHistory() {
   return getExamAttempts().map((e) => {
     const subjectName = e.examConfig?.subjectId
       ? getSubjectById(e.examConfig.subjectId)?.name
-      : 'Mixed';
+      : "Mixed";
     return {
       id: e.completedAt,
       completedAt: e.completedAt,
@@ -167,7 +179,7 @@ export function getExamHistory() {
 /* ------------------------------------------------------------------ */
 
 export function getMistakesSummary() {
-  const mistakes = getMistakes();
+  const mistakes = _getMistakes().filter((m) => !m.understoodAt);
   const bySubject = {};
   const byTopic = {};
 
@@ -182,4 +194,65 @@ export function getMistakesSummary() {
     bySubject,
     byTopic,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mistake Book helpers (Stage 6)                                    */
+/* ------------------------------------------------------------------ */
+
+export function getMistakeEntries({
+  status = "active",
+  subjectId,
+  topicId,
+} = {}) {
+  let list = _getMistakes();
+
+  if (status === "active") {
+    list = list.filter((m) => !m.understoodAt);
+  } else if (status === "understood") {
+    list = list.filter((m) => !!m.understoodAt);
+  }
+
+  if (subjectId) list = list.filter((m) => m.subjectId === subjectId);
+  if (topicId) list = list.filter((m) => m.topicId === topicId);
+
+  const enriched = list
+    .map((m) => {
+      const q = getQuestionById(m.questionId);
+      if (!q) return null;
+      const subject = getSubjectById(m.subjectId);
+      const topic = getTopicById(m.subjectId, m.topicId)?.topic;
+      return {
+        ...m,
+        question: q,
+        subjectName: subject?.name || m.subjectId,
+        topicName: topic?.name || m.topicId,
+      };
+    })
+    .filter(Boolean);
+
+  return enriched.sort((a, b) => (b.at || 0) - (a.at || 0));
+}
+
+export function getMistakeCounts() {
+  const list = _getMistakes();
+  const active = list.filter((m) => !m.understoodAt);
+  const understood = list.filter((m) => !!m.understoodAt);
+  const bySubject = {};
+  for (const m of active) {
+    bySubject[m.subjectId] = (bySubject[m.subjectId] || 0) + 1;
+  }
+  return {
+    total: list.length,
+    active: active.length,
+    understood: understood.length,
+    bySubject,
+  };
+}
+
+/** Returns question IDs the user should practice (active mistakes). */
+export function getActiveMistakeQuestionIds() {
+  return _getMistakes()
+    .filter((m) => !m.understoodAt)
+    .map((m) => m.questionId);
 }

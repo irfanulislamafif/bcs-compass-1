@@ -1,17 +1,19 @@
-import { Link } from 'react-router-dom';
-import { demoSubjects } from '../data/demoData.jsx';
-import { BookOpen, ArrowRight } from 'lucide-react';
-import AccuracyBadge from '../components/AccuracyBadge.jsx';
-import ProgressBar from '../components/ProgressBar.jsx';
+import { Link } from "react-router-dom";
+import { demoSubjects } from "../data/demoData.jsx";
+import { BookOpen, ArrowRight } from "lucide-react";
+import AccuracyBadge from "../components/AccuracyBadge.jsx";
+import ProgressBar from "../components/ProgressBar.jsx";
 
 export default function Subjects() {
   return (
     <div className="container-page py-12 md:py-16">
       <div className="max-w-2xl">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Subjects</h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          Subjects
+        </h1>
         <p className="mt-3 text-ink-500">
-          Explore the BCS syllabus by subject. Practice questions, track accuracy,
-          and jump into topic-level preparation.
+          Explore the BCS syllabus by subject. Practice questions, track
+          accuracy, and jump into topic-level preparation.
         </p>
       </div>
 
@@ -35,11 +37,14 @@ export default function Subjects() {
               </div>
               <ProgressBar value={s.progress} />
               <div className="mt-2 text-xs text-ink-500">
-                {s.questionsAttempted} questions attempted · {s.topics.length} topics
+                {s.questionsAttempted} questions attempted · {s.topics.length}{" "}
+                topics
               </div>
             </div>
 
-            <Link to={`/subjects/${s.id}`} className="btn-secondary mt-5 w-full">
+            <Link
+              to={`/subjects/${s.id}`}
+              className="btn-secondary mt-5 w-full">
               View Subject <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -50,7 +55,8 @@ export default function Subjects() {
         <div>
           <h3 className="font-semibold">Ready to start practicing?</h3>
           <p className="text-sm text-ink-500 mt-1">
-            The MCQ practice engine arrives in Stage 3. Create an account to be ready.
+            The MCQ practice engine arrives in Stage 3. Create an account to be
+            ready.
           </p>
         </div>
         <Link to="/register" className="btn-primary">
