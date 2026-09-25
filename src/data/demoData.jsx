@@ -1,0 +1,86 @@
+// Demo data — used by the frontend until the backend is available.
+// This will be replaced by API calls to /api/subjects and /api/topics.
+
+export const demoSubjects = [
+  {
+    id: "bangla",
+    name: "Bangla",
+    description: "বাংলা ব্যাকরণ, সাহিত্য ও ভাষা ব্যবহার।",
+    questionsAttempted: 240,
+    accuracy: 72,
+    progress: 45,
+  },
+  {
+    id: "english",
+    name: "English",
+    description: "Grammar, vocabulary, composition and reading comprehension.",
+    questionsAttempted: 310,
+    accuracy: 64,
+    progress: 52,
+  },
+  {
+    id: "math",
+    name: "Mathematical Reasoning",
+    description: "Arithmetic, algebra, geometry, and problem solving.",
+    questionsAttempted: 180,
+    accuracy: 41,
+    progress: 30,
+  },
+  {
+    id: "bd-affairs",
+    name: "Bangladesh Affairs",
+    description:
+      "History, geography, constitution, economy, and current affairs.",
+    questionsAttempted: 420,
+    accuracy: 68,
+    progress: 60,
+  },
+  {
+    id: "intl-affairs",
+    name: "International Affairs",
+    description: "Global politics, organizations, treaties, and world history.",
+    questionsAttempted: 150,
+    accuracy: 58,
+    progress: 38,
+  },
+  {
+    id: "science",
+    name: "General Science",
+    description: "Physics, chemistry, biology, and applied science.",
+    questionsAttempted: 130,
+    accuracy: 61,
+    progress: 42,
+  },
+  {
+    id: "ict",
+    name: "Computer & ICT",
+    description: "Computer fundamentals, networking, and ICT applications.",
+    questionsAttempted: 95,
+    accuracy: 70,
+    progress: 48,
+  },
+  {
+    id: "geography",
+    name: "Geography",
+    description: "Bangladesh and world geography, environment, and disasters.",
+    questionsAttempted: 110,
+    accuracy: 66,
+    progress: 44,
+  },
+  {
+    id: "mental-ability",
+    name: "Mental Ability",
+    description: "Logic, sequences, analogies, and reasoning puzzles.",
+    questionsAttempted: 140,
+    accuracy: 55,
+    progress: 35,
+  },
+  {
+    id: "ethics",
+    name: "Ethics & Good Governance",
+    description: "Ethics, values, governance, and public administration.",
+    questionsAttempted: 60,
+    accuracy: 62,
+    progress: 28,
+  },
+];
