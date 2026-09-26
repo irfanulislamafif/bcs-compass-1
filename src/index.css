@@ -21,7 +21,7 @@
   /* Bangla text: use the Bangla font */
   :lang(bn),
   .font-bn {
-    font-family: "Noto Sans Bengali", "Inter", sans-serif;
+    font-family: 'Hind Siliguri', 'Inter', sans-serif;
   }
 
   /* Focus ring */
@@ -176,12 +176,8 @@
     animation: shimmer 1.4s ease-in-out infinite;
   }
   @keyframes shimmer {
-    0% {
-      background-position: 200% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
   .dark .shimmer {
     background: linear-gradient(

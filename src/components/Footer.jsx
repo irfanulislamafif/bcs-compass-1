@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { Compass, Code, Send, Mail } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t border-ink-200/70 dark:border-ink-800/70 bg-white/50 dark:bg-ink-950/50 mt-20">
       <div className="container-page py-12">
@@ -12,11 +15,10 @@ export default function Footer() {
               <span className="font-bold text-lg">BCS Compass</span>
             </div>
             <p className="mt-3 text-sm text-ink-500 dark:text-ink-400 max-w-md">
-              Study Smarter. Practice Better. Know What to Improve.
+              {t("footer.tagline")}
             </p>
-            <p className="mt-4 text-xs text-ink-500 dark:text-ink-500 max-w-md">
-              BCS Compass is an independent preparation platform. It is not
-              affiliated with the Bangladesh Public Service Commission.
+            <p className="mt-4 text-xs text-ink-500 max-w-md">
+              {t("footer.disclaimer")}
             </p>
 
             <div className="mt-5 flex items-center gap-2">
@@ -46,47 +48,51 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold mb-3">Product</h4>
+            <h4 className="text-sm font-semibold mb-3">
+              {t("footer.product")}
+            </h4>
             <ul className="space-y-2 text-sm text-ink-600 dark:text-ink-400">
               <li>
                 <Link
                   to="/features"
                   className="hover:text-brand-600 transition-colors">
-                  Features
+                  {t("footer.features")}
                 </Link>
               </li>
               <li>
                 <Link
                   to="/how-it-works"
                   className="hover:text-brand-600 transition-colors">
-                  How It Works
+                  {t("footer.howItWorks")}
                 </Link>
               </li>
               <li>
                 <Link
                   to="/subjects"
                   className="hover:text-brand-600 transition-colors">
-                  Subjects
+                  {t("footer.subjects")}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold mb-3">Account</h4>
+            <h4 className="text-sm font-semibold mb-3">
+              {t("footer.account")}
+            </h4>
             <ul className="space-y-2 text-sm text-ink-600 dark:text-ink-400">
               <li>
                 <Link
                   to="/login"
                   className="hover:text-brand-600 transition-colors">
-                  Login
+                  {t("footer.login")}
                 </Link>
               </li>
               <li>
                 <Link
                   to="/register"
                   className="hover:text-brand-600 transition-colors">
-                  Register
+                  {t("footer.register")}
                 </Link>
               </li>
             </ul>
@@ -95,9 +101,9 @@ export default function Footer() {
 
         <div className="mt-10 pt-6 border-t border-ink-200/70 dark:border-ink-800/70 flex flex-col sm:flex-row justify-between gap-3 text-xs text-ink-500">
           <span>
-            © {new Date().getFullYear()} BCS Compass. All rights reserved.
+            © {new Date().getFullYear()} BCS Compass. {t("footer.rights")}
           </span>
-          <span>Built with ❤️ for serious BCS aspirants.</span>
+          <span>{t("footer.builtWith")}</span>
         </div>
       </div>
     </footer>

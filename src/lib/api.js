@@ -121,10 +121,27 @@ async function tryRefresh() {
 
 export const authApi = {
   register: (payload) =>
-    request("/auth/register", { method: "POST", body: payload, auth: false }),
+    request('/auth/register', { method: 'POST', body: payload, auth: false }),
   login: (payload) =>
-    request("/auth/login", { method: "POST", body: payload, auth: false }),
-  me: () => request("/auth/me"),
+    request('/auth/login', { method: 'POST', body: payload, auth: false }),
+  me: () => request('/auth/me'),
+
+  changePassword: (payload) =>
+    request('/auth/change-password', { method: 'POST', body: payload }),
+
+  forgotPassword: (email) =>
+    request('/auth/forgot-password', {
+      method: 'POST',
+      body: { email },
+      auth: false,
+    }),
+
+  resetPassword: (token, newPassword) =>
+    request('/auth/reset-password', {
+      method: 'POST',
+      body: { token, newPassword },
+      auth: false,
+    }),
 };
 
 export const healthApi = {

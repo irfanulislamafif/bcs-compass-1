@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
-  Sparkles,
   Target,
   ListChecks,
   AlertTriangle,
@@ -11,6 +10,7 @@ import {
   ArrowRight,
   BookOpen,
   Brain,
+  KeyRound,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import ProgressBar from "../components/ProgressBar.jsx";
@@ -57,38 +57,36 @@ export default function Dashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Link
           to="/subjects"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
-          <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
-            <BookOpen className="h-5 w-5 text-brand-600" />
+          className="card p-4 flex items-center gap-3 card-hover">
+          <div className="h-10 w-10 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center shrink-0">
+            <BookOpen className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm">Start Practice</div>
-            <div className="text-xs text-ink-500">
-              Browse subjects &amp; topics
-            </div>
+            <div className="text-xs text-ink-500">Browse subjects</div>
           </div>
         </Link>
 
         <Link
           to="/exam"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
-          <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
-            <Trophy className="h-5 w-5 text-brand-600" />
+          className="card p-4 flex items-center gap-3 card-hover">
+          <div className="h-10 w-10 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center shrink-0">
+            <Trophy className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm">Take Exam</div>
-            <div className="text-xs text-ink-500">Timed, exam-style test</div>
+            <div className="text-xs text-ink-500">Timed test</div>
           </div>
         </Link>
 
         <Link
           to="/mistakes"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
-          <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
+          className="card p-4 flex items-center gap-3 card-hover">
+          <div className="h-10 w-10 rounded-lg bg-red-50 dark:bg-red-950/40 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm">Review Mistakes</div>
@@ -100,13 +98,25 @@ export default function Dashboard() {
 
         <Link
           to="/ai-lab"
-          className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
-          <div className="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
-            <Brain className="h-5 w-5 text-brand-600" />
+          className="card p-4 flex items-center gap-3 card-hover">
+          <div className="h-10 w-10 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center shrink-0">
+            <Brain className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm">AI Study Lab</div>
-            <div className="text-xs text-ink-500">Generate from your notes</div>
+            <div className="text-xs text-ink-500">Generate from notes</div>
+          </div>
+        </Link>
+
+        <Link
+          to="/settings"
+          className="card p-4 flex items-center gap-3 card-hover">
+          <div className="h-10 w-10 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center shrink-0">
+            <KeyRound className="h-5 w-5 text-brand-600 dark:text-brand-400" />
+          </div>
+          <div className="min-w-0">
+            <div className="font-semibold text-sm">Settings</div>
+            <div className="text-xs text-ink-500">Password &amp; account</div>
           </div>
         </Link>
       </div>
@@ -262,7 +272,7 @@ export default function Dashboard() {
                           {t.subjectName}
                         </div>
                       </div>
-                      <span className="badge bg-red-50 text-red-700 shrink-0">
+                      <span className="badge bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 shrink-0">
                         {t.accuracy}%
                       </span>
                     </div>
@@ -333,7 +343,7 @@ export default function Dashboard() {
         ) : (
           <div className="card overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-ink-100/60 text-ink-500 text-xs uppercase tracking-wide">
+              <thead className="bg-ink-100/60 dark:bg-ink-800/60 text-ink-500 text-xs uppercase tracking-wide">
                 <tr>
                   <th className="text-left px-4 py-3">Exam</th>
                   <th className="text-right px-4 py-3">Score</th>
@@ -342,7 +352,9 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {recentExams.map((e) => (
-                  <tr key={e.id} className="border-t border-ink-100">
+                  <tr
+                    key={e.id}
+                    className="border-t border-ink-100 dark:border-ink-800">
                     <td className="px-4 py-3 font-medium">{e.title}</td>
                     <td className="px-4 py-3 text-right">
                       {e.score}/{e.total}
@@ -351,10 +363,10 @@ export default function Dashboard() {
                       <span
                         className={`badge ${
                           e.accuracy >= 70
-                            ? "bg-green-50 text-green-700"
+                            ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400"
                             : e.accuracy >= 55
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-red-50 text-red-700"
+                              ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400"
+                              : "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"
                         }`}>
                         {e.accuracy}%
                       </span>

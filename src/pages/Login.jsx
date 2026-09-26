@@ -42,7 +42,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-ink-100/40">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-ink-100/40 dark:bg-ink-950">
       <div className="card p-8 w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 mb-6">
           <Compass className="h-6 w-6 text-brand-600" />
@@ -55,7 +55,7 @@ export default function Login() {
         </p>
 
         {error && (
-          <div className="mt-5 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+          <div className="mt-5 flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 text-sm">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -79,9 +79,17 @@ export default function Login() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1.5">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium">
+                Password
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs text-brand-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               id="password"
               type="password"
@@ -99,8 +107,13 @@ export default function Login() {
             disabled={submitting}
             className="btn-primary w-full"
           >
-            {submitting ? 'Logging in…' : 'Log In'}
-            {!submitting && <LogIn className="h-4 w-4" />}
+            {submitting ? (
+              'Logging in…'
+            ) : (
+              <>
+                Log In <LogIn className="h-4 w-4" />
+              </>
+            )}
           </button>
         </form>
 
@@ -116,7 +129,7 @@ export default function Login() {
 
         <Link
           to="/"
-          className="mt-4 block text-center text-xs text-ink-500 hover:text-ink-900"
+          className="mt-4 block text-center text-xs text-ink-500 hover:text-ink-900 dark:hover:text-white"
         >
           ← Back to Home
         </Link>
