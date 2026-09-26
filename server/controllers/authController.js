@@ -10,6 +10,10 @@ import { sendPasswordResetEmail } from "../utils/email.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/* ------------------------------------------------------------------ */
+/*  POST /api/auth/register                                           */
+/* ------------------------------------------------------------------ */
+
 export async function register(req, res, next) {
   try {
     const { name, email, password, targetExam } = req.body || {};
@@ -55,6 +59,10 @@ export async function register(req, res, next) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  POST /api/auth/login                                              */
+/* ------------------------------------------------------------------ */
+
 export async function login(req, res, next) {
   try {
     const { email, password } = req.body || {};
@@ -87,6 +95,10 @@ export async function login(req, res, next) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  POST /api/auth/refresh                                            */
+/* ------------------------------------------------------------------ */
+
 export async function refresh(req, res, next) {
   try {
     const { refreshToken } = req.body || {};
@@ -116,12 +128,8 @@ export async function refresh(req, res, next) {
   }
 }
 
-import crypto from "crypto";
-import { sendPasswordResetEmail } from "../utils/email.js";
-
 /* ------------------------------------------------------------------ */
 /*  POST /api/auth/change-password                                    */
-/*  Body: { currentPassword, newPassword }                            */
 /*  Requires: logged-in user                                          */
 /* ------------------------------------------------------------------ */
 
@@ -192,7 +200,7 @@ export async function forgotPassword(req, res, next) {
       return res.json(genericResponse);
     }
 
-    /* Generate token */
+    /* Generate a random token. Store only the hash. */
     const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = crypto
       .createHash("sha256")
@@ -203,7 +211,7 @@ export async function forgotPassword(req, res, next) {
     user.resetTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 min
     await user.save();
 
-    /* Build reset URL — use the first allowed origin */
+    /* Build reset URL — use the first allowed origin as the base */
     const origins = (process.env.CLIENT_URL || "http://localhost:5173")
       .split(",")
       .map((s) => s.trim())
@@ -218,7 +226,7 @@ export async function forgotPassword(req, res, next) {
         userName: user.name,
       });
     } catch (emailErr) {
-      /* Log but don't fail the request — the user gets the generic response anyway */
+      /* Log but don't fail — user sees generic response either way */
       console.error("Failed to send reset email:", emailErr.message);
     }
 
