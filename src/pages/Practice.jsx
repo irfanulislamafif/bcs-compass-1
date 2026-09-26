@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,10 +32,12 @@ import EmptyState from '../components/EmptyState.jsx';
  *  - /practice/topic/:subjectId/:topicId   → practice a topic
  *  - /practice/subject/:subjectId          → practice a subject (mixed topics)
  *  - /practice?mode=mistakes               → practice active mistakes
+ *  - /practice (with location.state.aiQuestions) → practice AI questions
  *  - /practice?limit=10&subjectId=&topicId=&difficulty=
  */
 export default function Practice() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { subjectId: subjFromPath, topicId: topicFromPath } = useParams();
   const [searchParams] = useSearchParams();
 
@@ -39,16 +47,26 @@ export default function Practice() {
   const limit = Number(searchParams.get('limit') || 10);
   const mode = searchParams.get('mode') || 'normal';
 
+  /* ------- AI questions passed via navigation state ------- */
+  const aiQuestions = location.state?.aiQuestions || null;
+  const aiMeta = location.state?.aiMeta || null; // { subjectId, topicId, label }
+
   /* ------- Build session once on mount ------- */
   const questions = useMemo(() => {
+    // 1. AI-generated questions (from AI Lab)
+    if (aiQuestions && aiQuestions.length > 0) {
+      return aiQuestions;
+    }
+    // 2. Practice from mistakes
     if (mode === 'mistakes') {
       const ids = getActiveMistakeQuestionIds();
       const list = ids.map((id) => getQuestionById(id)).filter(Boolean);
       return list.sort(() => Math.random() - 0.5);
     }
+    // 3. Regular practice
     return buildSession({ subjectId, topicId, difficulty, limit });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, subjectId, topicId, difficulty, limit]);
+  }, [mode, subjectId, topicId, difficulty, limit, aiQuestions]);
 
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { [questionIndex]: selectedOption }
@@ -118,14 +136,37 @@ export default function Practice() {
       };
     });
     navigate('/practice/result', {
-      state: { results, timeSpentMs, subjectId, topicId },
+      state: {
+        results,
+        timeSpentMs,
+        subjectId: aiMeta?.subjectId || subjectId,
+        topicId: aiMeta?.topicId || topicId,
+        fromAI: !!aiQuestions,
+      },
       replace: true,
     });
   }
 
   /* ------- Empty state ------- */
   if (total === 0) {
-    if (mode === 'mistakes') {
+    if (aiQuestions && aiQuestions.length === 0) {
+      return (
+        <div className="container-page py-12">
+          <EmptyState
+            icon={ListChecks}
+            title="No AI questions to practice"
+            description="Generate MCQs in the AI Study Lab first, then return here to practice them."
+            action={
+              <Link to="/ai-lab" className="btn-primary">
+                Open AI Study Lab
+              </Link>
+            }
+          />
+        </div>
+      );
+    }
+
+    if (mode === 'mistakes' && !aiQuestions) {
       return (
         <div className="container-page py-12">
           <EmptyState
@@ -141,6 +182,7 @@ export default function Practice() {
         </div>
       );
     }
+
     return (
       <div className="container-page py-12">
         <EmptyState
@@ -163,7 +205,12 @@ export default function Practice() {
       <Breadcrumbs
         items={[
           { label: 'Home', to: '/' },
-          ...(mode === 'mistakes'
+          ...(aiQuestions
+            ? [
+                { label: 'AI Study Lab', to: '/ai-lab' },
+                { label: 'AI Practice' },
+              ]
+            : mode === 'mistakes'
             ? [
                 { label: 'Mistake Book', to: '/mistakes' },
                 { label: 'Practice Mistakes' },
@@ -194,8 +241,12 @@ export default function Practice() {
         </button>
 
         <div className="text-sm text-ink-500">
-          {mode === 'mistakes' ? 'Mistakes Practice' : 'Practice Mode'} ·{' '}
-          {Object.keys(answers).length}/{total} answered
+          {aiQuestions
+            ? 'AI Practice'
+            : mode === 'mistakes'
+            ? 'Mistakes Practice'
+            : 'Practice Mode'}{' '}
+          · {Object.keys(answers).length}/{total} answered
         </div>
       </div>
 
