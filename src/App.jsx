@@ -19,6 +19,8 @@ import Revision from './pages/Revision.jsx';
 import AIStudyLab from './pages/AIStudyLab.jsx';
 import QuestionBank from './pages/QuestionBank.jsx';
 import WrittenPractice from './pages/WrittenPractice.jsx';
+import MyPdfs from './pages/MyPdfs.jsx';
+import PdfWorkspace from './pages/PdfWorkspace.jsx';
 import Features from './pages/Features.jsx';
 import HowItWorks from './pages/HowItWorks.jsx';
 import Login from './pages/Login.jsx';
@@ -48,6 +50,8 @@ export default function App() {
           <Route path="/ai-lab" element={<P><AIStudyLab /></P>} />
           <Route path="/question-bank" element={<P><QuestionBank /></P>} />
           <Route path="/written-practice" element={<P><WrittenPractice /></P>} />
+          <Route path="/my-pdfs" element={<P><MyPdfs /></P>} />
+          <Route path="/pdf-workspace/:id" element={<P><PdfWorkspace /></P>} />
 
           <Route
             path="/practice/topic/:subjectId/:topicId"

@@ -1,22 +1,23 @@
-import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Compass, Menu, X, LogOut, User as UserIcon } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext.jsx";
+import { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Compass, Menu, X, LogOut, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const publicLinks = [
-  { to: "/", label: "Home" },
-  { to: "/subjects", label: "Subjects" },
+  { to: '/', label: 'Home' },
+  { to: '/subjects', label: 'Subjects' },
 ];
 
 const authedLinks = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/exam", label: "Exams" },
-  { to: "/ai-lab", label: "AI Lab" },
-  { to: "/question-bank", label: "AI Bank" },
-  { to: "/written-practice", label: "Written" },
-  { to: "/revision", label: "Revision" },
-  { to: "/mistakes", label: "Mistake Book" },
-  { to: "/progress", label: "Progress" },
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/exam', label: 'Exams' },
+  { to: '/ai-lab', label: 'AI Lab' },
+  { to: '/question-bank', label: 'AI Bank' },
+  { to: '/written-practice', label: 'Written' },
+  { to: '/my-pdfs', label: 'PDFs' },
+  { to: '/revision', label: 'Revision' },
+  { to: '/mistakes', label: 'Mistake Book' },
+  { to: '/progress', label: 'Progress' },
 ];
 
 export default function Navbar() {
@@ -29,7 +30,7 @@ export default function Navbar() {
   function handleLogout() {
     logout();
     setOpen(false);
-    navigate("/");
+    navigate('/');
   }
 
   return (
@@ -37,12 +38,11 @@ export default function Navbar() {
       <div className="container-page">
         <div className="flex h-16 items-center justify-between">
           <Link
-            to={isAuthenticated ? "/dashboard" : "/"}
-            className="flex items-center gap-2">
+            to={isAuthenticated ? '/dashboard' : '/'}
+            className="flex items-center gap-2"
+          >
             <Compass className="h-7 w-7 text-brand-600" strokeWidth={2.2} />
-            <span className="text-lg font-bold tracking-tight">
-              BCS Compass
-            </span>
+            <span className="text-lg font-bold tracking-tight">BCS Compass</span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
@@ -50,14 +50,15 @@ export default function Navbar() {
               <NavLink
                 key={l.to}
                 to={l.to}
-                end={l.to === "/"}
+                end={l.to === '/'}
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? "text-brand-700 bg-brand-50"
-                      : "text-ink-700 hover:text-ink-900 hover:bg-ink-100"
+                      ? 'text-brand-700 bg-brand-50'
+                      : 'text-ink-700 hover:text-ink-900 hover:bg-ink-100'
                   }`
-                }>
+                }
+              >
                 {l.label}
               </NavLink>
             ))}
@@ -75,7 +76,8 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="btn-secondary">
+                  className="btn-secondary"
+                >
                   <LogOut className="h-4 w-4" /> Logout
                 </button>
               </>
@@ -95,7 +97,8 @@ export default function Navbar() {
             className="lg:hidden p-2 rounded-lg hover:bg-ink-100"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
-            aria-expanded={open}>
+            aria-expanded={open}
+          >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
@@ -106,15 +109,16 @@ export default function Navbar() {
               <NavLink
                 key={l.to}
                 to={l.to}
-                end={l.to === "/"}
+                end={l.to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `block px-3 py-2 rounded-lg text-sm font-medium ${
                     isActive
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-ink-700 hover:bg-ink-100"
+                      ? 'bg-brand-50 text-brand-700'
+                      : 'text-ink-700 hover:bg-ink-100'
                   }`
-                }>
+                }
+              >
                 {l.label}
               </NavLink>
             ))}
@@ -129,7 +133,8 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="btn-secondary w-full">
+                    className="btn-secondary w-full"
+                  >
                     <LogOut className="h-4 w-4" /> Logout
                   </button>
                 </div>
@@ -138,13 +143,15 @@ export default function Navbar() {
                   <Link
                     to="/login"
                     onClick={() => setOpen(false)}
-                    className="btn-secondary">
+                    className="btn-secondary"
+                  >
                     Login
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setOpen(false)}
-                    className="btn-primary">
+                    className="btn-primary"
+                  >
                     Start Preparing
                   </Link>
                 </div>
