@@ -10,6 +10,7 @@ import {
   RefreshCw,
   ArrowRight,
   Play,
+  PlusCircle,
 } from "lucide-react";
 import { questionApi, examApi } from "../lib/api.js";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
@@ -28,6 +29,7 @@ export default function QuestionBank() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sourceTab, setSourceTab] = useState("");
 
   const [difficulty, setDifficulty] = useState("");
   const [language, setLanguage] = useState("");
@@ -42,13 +44,14 @@ export default function QuestionBank() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [difficulty, language]);
+  }, [difficulty, language, sourceTab]);
 
   async function load() {
     setLoading(true);
     setError("");
     try {
-      const filters = { sourceType: "ai" };
+      const filters = {};
+      if (sourceTab) filters.sourceType = sourceTab;
       if (difficulty) filters.difficulty = difficulty;
       if (language) filters.language = language;
       const data = await questionApi.list(filters);
@@ -79,11 +82,10 @@ export default function QuestionBank() {
     setExamLoading(true);
     try {
       const data = await examApi.build({
-        title: "AI Question Bank Exam",
+        title: "Question Bank Exam",
         count: examCount,
         durationMin: examDuration,
         difficulty: examDifficulty,
-        source: "ai",
       });
 
       const exam = data.exam;
@@ -95,7 +97,7 @@ export default function QuestionBank() {
           topicId: doc.topicId,
           difficulty: doc.difficulty,
           type: "mcq",
-          sourceType: "ai",
+          sourceType: doc.sourceType,
           question: doc.question,
           options: doc.options,
           answer: doc.answer,
@@ -132,28 +134,56 @@ export default function QuestionBank() {
   return (
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
-        items={[{ label: "Home", to: "/" }, { label: "AI Question Bank" }]}
+        items={[{ label: "Home", to: "/" }, { label: "Question Bank" }]}
       />
 
       <div className="max-w-2xl">
-        <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
             <ListChecks className="h-6 w-6 text-brand-600" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              AI Question Bank
+              Question Bank
             </h1>
             <p className="text-sm text-ink-500">
-              Your saved AI-generated questions. Build exams from them anytime.
+              Your saved questions. Build exams from them anytime.
             </p>
+          </div>
+          <Link
+            to="/question-bank/create"
+            className="btn-primary whitespace-nowrap">
+            <PlusCircle className="h-4 w-4" /> Create
+          </Link>
+        </div>
+
+        {/* Tabs */}
+        <div className="mt-6 border-b border-ink-100">
+          <div className="flex gap-1 overflow-x-auto">
+            {[
+              { id: "", label: "All" },
+              { id: "user", label: "My Questions" },
+              { id: "ai", label: "AI Generated" },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setSourceTab(t.id)}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  sourceTab === t.id
+                    ? "border-brand-600 text-brand-700"
+                    : "border-transparent text-ink-500 hover:text-ink-900"
+                }`}>
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Exam builder */}
-      <div className="mt-8 card p-6">
-        <h2 className="font-semibold mb-4">Build an AI Exam</h2>
+      <div className="mt-6 card p-6">
+        <h2 className="font-semibold mb-4">Build an Exam from Your Bank</h2>
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
             <label className="block text-xs text-ink-500 mb-1.5">
@@ -210,7 +240,7 @@ export default function QuestionBank() {
                 </>
               ) : (
                 <>
-                  <Play className="h-4 w-4" /> Start AI Exam
+                  <Play className="h-4 w-4" /> Start Exam
                 </>
               )}
             </button>
@@ -220,8 +250,8 @@ export default function QuestionBank() {
           <div className="mt-3 text-sm text-red-600">{examError}</div>
         )}
         <div className="mt-3 text-xs text-ink-500">
-          Exam uses only your own AI questions. Save some in the AI Study Lab
-          first.
+          Exam uses questions from your bank. Add more from the AI Lab or by
+          creating them manually.
         </div>
       </div>
 
@@ -296,12 +326,17 @@ export default function QuestionBank() {
         ) : questions.length === 0 ? (
           <EmptyState
             icon={ListChecks}
-            title="No AI questions saved yet"
-            description="Generate MCQs in the AI Study Lab and click 'Save to Bank'. They'll appear here, ready to practice or build exams from."
+            title="No questions saved yet"
+            description="Generate MCQs in the AI Study Lab, or write your own manually. They'll appear here, ready to practice or build exams from."
             action={
-              <Link to="/ai-lab" className="btn-primary">
-                Open AI Study Lab <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Link to="/ai-lab" className="btn-secondary">
+                  Open AI Study Lab
+                </Link>
+                <Link to="/question-bank/create" className="btn-primary">
+                  <PlusCircle className="h-4 w-4" /> Create Question
+                </Link>
+              </div>
             }
           />
         ) : (
@@ -312,12 +347,25 @@ export default function QuestionBank() {
                   <span className="badge bg-brand-50 text-brand-700">
                     {q.subjectId}
                   </span>
+                  {q.section && (
+                    <span className="badge bg-ink-100 text-ink-700">
+                      {q.section}
+                    </span>
+                  )}
                   <span className="badge bg-ink-100 text-ink-700">
                     {q.difficulty}
+                  </span>
+                  <span className="badge bg-ink-100 text-ink-700">
+                    {q.sourceType === "user" ? "Mine" : q.sourceType}
                   </span>
                   {q.language === "bn" && (
                     <span className="badge bg-amber-50 text-amber-700">
                       বাংলা
+                    </span>
+                  )}
+                  {q.isPublic && (
+                    <span className="badge bg-brand-50 text-brand-700">
+                      public
                     </span>
                   )}
                   {q.status === "pending" && (

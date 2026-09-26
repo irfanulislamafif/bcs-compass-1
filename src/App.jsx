@@ -19,6 +19,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Revision from "./pages/Revision.jsx";
 import AIStudyLab from "./pages/AIStudyLab.jsx";
 import QuestionBank from "./pages/QuestionBank.jsx";
+import CreateQuestion from "./pages/CreateQuestion.jsx";
 import WrittenPractice from "./pages/WrittenPractice.jsx";
 import MyPdfs from "./pages/MyPdfs.jsx";
 import PdfWorkspace from "./pages/PdfWorkspace.jsx";
@@ -85,6 +86,14 @@ export default function App() {
             element={
               <P>
                 <QuestionBank />
+              </P>
+            }
+          />
+          <Route
+            path="/question-bank/create"
+            element={
+              <P>
+                <CreateQuestion />
               </P>
             }
           />

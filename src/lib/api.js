@@ -3,8 +3,7 @@
  * Automatically attaches access token and refreshes it if expired.
  */
 
-const BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const STORAGE_KEYS = {
   access: "bcs_compass_access_token",
@@ -152,11 +151,17 @@ export const aiApi = {
 export const questionApi = {
   save: (questions) =>
     request("/questions", { method: "POST", body: { questions } }),
+
+  saveManual: (payload) =>
+    request("/questions/manual", { method: "POST", body: payload }),
+
   list: (filters = {}) => {
     const qs = new URLSearchParams(filters).toString();
     return request(`/questions${qs ? `?${qs}` : ""}`);
   },
   get: (id) => request(`/questions/${id}`),
+  update: (id, payload) =>
+    request(`/questions/${id}`, { method: "PATCH", body: payload }),
   remove: (id) => request(`/questions/${id}`, { method: "DELETE" }),
 };
 
