@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Compass, Github, Twitter, Mail } from "lucide-react";
+import { Compass, Code, Send, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -31,16 +31,16 @@ export default function Footer() {
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 rounded-lg text-ink-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors"
-                aria-label="GitHub">
-                <Github className="h-4 w-4" />
+                aria-label="Source code">
+                <Code className="h-4 w-4" />
               </a>
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 rounded-lg text-ink-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors"
-                aria-label="Twitter">
-                <Twitter className="h-4 w-4" />
+                aria-label="Contact">
+                <Send className="h-4 w-4" />
               </a>
             </div>
           </div>
