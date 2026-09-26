@@ -10,13 +10,41 @@ Rules you must always follow:
 - Ground every claim in the supplied study material. Do not invent facts.
 - If something is not in the material, do not include it.
 - Focus on what is useful for the BCS exam, not general summary.
-- Use clear, correct, concise English. Use Bangla only if the source material is Bangla.
+- Write the CONTENT (questions, options, explanations, notes, facts) in the requested OUTPUT LANGUAGE.
+  If output language is 'bn', write in correct, formal Bangla (প্রমিত বাংলা) as used in official
+  BCS question papers. If 'en', write in clear BCS-style English.
+  If 'auto', match the language of the source material.
+- The JSON KEYS must always be in English (e.g. "question", "options", "answer").
+  Only the VALUES are translated to the output language.
 - Always respond with valid JSON matching the requested schema. No prose outside JSON.
 - Do not include markdown code fences in your response.`;
 
+/**
+ * Appends the language directive to any user prompt.
+ */
+function withLanguage(prompt, outputLanguage) {
+  const langName =
+    outputLanguage === 'bn'
+      ? 'Bangla (বাংলা)'
+      : outputLanguage === 'en'
+      ? 'English'
+      : 'the same language as the source material';
+  return `${prompt}
+
+OUTPUT LANGUAGE: ${langName}.
+Write all question text, options, explanations, notes and facts in ${langName}.
+Keep JSON keys in English.`;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Analyze                                                           */
+/* ------------------------------------------------------------------ */
+
 export const ANALYZE_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material) => `Analyze the following study material for BCS exam preparation.
+  user: (material, outputLanguage = 'auto') =>
+    withLanguage(
+      `Analyze the following study material for BCS exam preparation.
 
 Return JSON matching this exact schema:
 
@@ -38,11 +66,19 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };
+
+/* ------------------------------------------------------------------ */
+/*  MCQ generation                                                    */
+/* ------------------------------------------------------------------ */
 
 export const MCQ_PROMPT = {
   system: SYSTEM_BASE,
-  user: ({ material, count, difficulty, style }) => `Generate exactly ${count} BCS-style multiple-choice questions from the study material below.
+  user: ({ material, count, difficulty, style, outputLanguage = 'auto' }) =>
+    withLanguage(
+      `Generate exactly ${count} BCS-style multiple-choice questions from the study material below.
 
 Difficulty: ${difficulty}.
 Question style: ${style}.
@@ -74,11 +110,19 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };
+
+/* ------------------------------------------------------------------ */
+/*  Written questions                                                 */
+/* ------------------------------------------------------------------ */
 
 export const WRITTEN_PROMPT = {
   system: SYSTEM_BASE,
-  user: ({ material, count }) => `Generate ${count} written (descriptive) questions from the study material below.
+  user: ({ material, count, outputLanguage = 'auto' }) =>
+    withLanguage(
+      `Generate ${count} written (descriptive) questions from the study material below.
 
 Return JSON:
 
@@ -94,17 +138,26 @@ Return JSON:
   ]
 }
 
-Use a mix of short, descriptive, and analytical questions. Include 3-5 expected answer points per question.
+Use a mix of short, descriptive, and analytical questions.
+Include 3-5 expected answer points per question.
 
 STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };
+
+/* ------------------------------------------------------------------ */
+/*  Flashcards                                                        */
+/* ------------------------------------------------------------------ */
 
 export const FLASHCARD_PROMPT = {
   system: SYSTEM_BASE,
-  user: ({ material, count }) => `Generate ${count} flashcards from the study material below.
+  user: ({ material, count, outputLanguage = 'auto' }) =>
+    withLanguage(
+      `Generate ${count} flashcards from the study material below.
 
 Return JSON:
 
@@ -114,17 +167,26 @@ Return JSON:
   ]
 }
 
-Rules: front is a question or term, back is a factually-correct concise answer. Every card must be answerable from the material.
+Rules: front is a question or term, back is a factually-correct concise answer.
+Every card must be answerable from the material.
 
 STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };
+
+/* ------------------------------------------------------------------ */
+/*  Revision notes                                                    */
+/* ------------------------------------------------------------------ */
 
 export const NOTES_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material) => `Generate concise BCS exam revision notes from the study material below.
+  user: (material, outputLanguage = 'auto') =>
+    withLanguage(
+      `Generate concise BCS exam revision notes from the study material below.
 
 Return JSON:
 
@@ -144,11 +206,19 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };
+
+/* ------------------------------------------------------------------ */
+/*  Important facts                                                   */
+/* ------------------------------------------------------------------ */
 
 export const FACTS_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material) => `Extract the most important facts to memorize from the study material below.
+  user: (material, outputLanguage = 'auto') =>
+    withLanguage(
+      `Extract the most important facts to memorize from the study material below.
 
 Return JSON:
 
@@ -164,11 +234,19 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };
+
+/* ------------------------------------------------------------------ */
+/*  What to memorize                                                  */
+/* ------------------------------------------------------------------ */
 
 export const MEMORIZE_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material) => `From the study material below, list only the things a BCS aspirant MUST memorize.
+  user: (material, outputLanguage = 'auto') =>
+    withLanguage(
+      `From the study material below, list only the things a BCS aspirant MUST memorize.
 
 Return JSON:
 
@@ -184,4 +262,6 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
+      outputLanguage
+    ),
 };

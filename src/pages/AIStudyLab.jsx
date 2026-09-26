@@ -1,76 +1,32 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  Sparkles,
-  Brain,
-  ListChecks,
-  PenLine,
-  Layers,
-  FileText,
-  Lightbulb,
-  BookMarked,
-  Loader2,
-  AlertCircle,
-  RefreshCw,
-  History,
-} from "lucide-react";
-import { aiApi } from "../lib/api.js";
-import Breadcrumbs from "../components/Breadcrumbs.jsx";
+  Sparkles, Brain, ListChecks, PenLine, Layers, FileText, Lightbulb,
+  BookMarked, Loader2, AlertCircle, RefreshCw, History,
+} from 'lucide-react';
+import { aiApi } from '../lib/api.js';
+import Breadcrumbs from '../components/Breadcrumbs.jsx';
 
 const ACTIONS = [
-  {
-    id: "analyze",
-    label: "Analyze Material",
-    icon: Sparkles,
-    desc: "Exam-focused breakdown",
-  },
-  {
-    id: "mcq",
-    label: "Generate MCQs",
-    icon: ListChecks,
-    desc: "BCS-style MCQs with answers",
-  },
-  {
-    id: "written",
-    label: "Written Questions",
-    icon: PenLine,
-    desc: "Short & descriptive questions",
-  },
-  {
-    id: "flashcards",
-    label: "Flashcards",
-    icon: Layers,
-    desc: "Front/back study cards",
-  },
-  {
-    id: "notes",
-    label: "Revision Notes",
-    icon: FileText,
-    desc: "Condensed revision sheet",
-  },
-  {
-    id: "facts",
-    label: "Important Facts",
-    icon: Lightbulb,
-    desc: "Key facts to memorize",
-  },
-  {
-    id: "memorize",
-    label: "What to Memorize",
-    icon: BookMarked,
-    desc: "Must-remember items",
-  },
+  { id: 'analyze',    label: 'Analyze Material',    icon: Sparkles,   desc: 'Exam-focused breakdown' },
+  { id: 'mcq',        label: 'Generate MCQs',       icon: ListChecks, desc: 'BCS-style MCQs with answers' },
+  { id: 'written',    label: 'Written Questions',   icon: PenLine,    desc: 'Short & descriptive questions' },
+  { id: 'flashcards', label: 'Flashcards',          icon: Layers,     desc: 'Front/back study cards' },
+  { id: 'notes',      label: 'Revision Notes',      icon: FileText,   desc: 'Condensed revision sheet' },
+  { id: 'facts',      label: 'Important Facts',     icon: Lightbulb,  desc: 'Key facts to memorize' },
+  { id: 'memorize',   label: 'What to Memorize',    icon: BookMarked, desc: 'Must-remember items' },
 ];
 
 export default function AIStudyLab() {
   const navigate = useNavigate();
-  const [material, setMaterial] = useState("");
-  const [difficulty, setDifficulty] = useState("medium");
+  const [material, setMaterial] = useState('');
+  const [outputLanguage, setOutputLanguage] = useState('auto');
+  const [difficulty, setDifficulty] = useState('medium');
   const [mcqCount, setMcqCount] = useState(5);
 
   const [loading, setLoading] = useState(false);
   const [loadingKind, setLoadingKind] = useState(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [result, setResult] = useState(null); // { kind, data }
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -97,47 +53,32 @@ export default function AIStudyLab() {
   }
 
   async function run(kind) {
-    setError("");
+    setError('');
     setResult(null);
     setLoading(true);
     setLoadingKind(kind);
     try {
-      let payload = { material };
-      if (kind === "mcq") {
-        payload = { material, count: mcqCount, difficulty };
+      let payload = { material, outputLanguage };
+      if (kind === 'mcq') {
+        payload = { material, count: mcqCount, difficulty, outputLanguage };
       }
 
       let data;
       switch (kind) {
-        case "analyze":
-          data = await aiApi.analyze(payload);
-          break;
-        case "mcq":
-          data = await aiApi.mcq(payload);
-          break;
-        case "written":
-          data = await aiApi.written(payload);
-          break;
-        case "flashcards":
-          data = await aiApi.flashcards(payload);
-          break;
-        case "notes":
-          data = await aiApi.notes(payload);
-          break;
-        case "facts":
-          data = await aiApi.facts(payload);
-          break;
-        case "memorize":
-          data = await aiApi.memorize(payload);
-          break;
-        default:
-          throw new Error("Unknown action");
+        case 'analyze':    data = await aiApi.analyze(payload);    break;
+        case 'mcq':        data = await aiApi.mcq(payload);        break;
+        case 'written':    data = await aiApi.written(payload);    break;
+        case 'flashcards': data = await aiApi.flashcards(payload); break;
+        case 'notes':      data = await aiApi.notes(payload);      break;
+        case 'facts':      data = await aiApi.facts(payload);      break;
+        case 'memorize':   data = await aiApi.memorize(payload);   break;
+        default: throw new Error('Unknown action');
       }
 
       setResult({ kind, data: data.result });
       loadHistory();
     } catch (err) {
-      setError(err.message || "AI generation failed. Please try again.");
+      setError(err.message || 'AI generation failed. Please try again.');
     } finally {
       setLoading(false);
       setLoadingKind(null);
@@ -145,40 +86,49 @@ export default function AIStudyLab() {
   }
 
   function clearAll() {
-    setMaterial("");
+    setMaterial('');
     setResult(null);
-    setError("");
+    setError('');
   }
 
   function loadSample() {
     setMaterial(
-      "The Constitution of Bangladesh was adopted on 4 November 1972 and came into effect on 16 December 1972. " +
-        "It originally had 153 articles, 11 parts, and 7 schedules. The Constitution declares Bangladesh a unitary, " +
-        "independent, sovereign republic. Fundamental rights are guaranteed in Part III. The Prime Minister is the " +
-        "head of government and the President is the head of state. Article 7 declares the Constitution the supreme law of the republic.",
+      'The Constitution of Bangladesh was adopted on 4 November 1972 and came into effect on 16 December 1972. ' +
+      'It originally had 153 articles, 11 parts, and 7 schedules. The Constitution declares Bangladesh a unitary, ' +
+      'independent, sovereign republic. Fundamental rights are guaranteed in Part III. The Prime Minister is the ' +
+      'head of government and the President is the head of state. Article 7 declares the Constitution the supreme law of the republic.'
+    );
+  }
+
+  function loadSampleBn() {
+    setMaterial(
+      'বাংলাদেশের সংবিধান ৪ নভেম্বর ১৯৭২ সালে গৃহীত হয় এবং ১৬ ডিসেম্বর ১৯৭২ সালে কার্যকর হয়। ' +
+      'সংবিধানে মূলত ১৫৩টি অনুচ্ছেদ, ১১টি ভাগ এবং ৭টি তফসিল ছিল। সংবিধানে বাংলাদেশকে একটি একক, স্বাধীন, ' +
+      'সার্বভৌম প্রজাতন্ত্র হিসেবে ঘোষণা করা হয়েছে। মৌলিক অধিকারসমূহ তৃতীয় ভাগে নিশ্চিত করা হয়েছে। ' +
+      'প্রধানমন্ত্রী হলেন সরকার প্রধান এবং রাষ্ট্রপতি হলেন রাষ্ট্রপ্রধান।'
     );
   }
 
   function handlePractice(questions) {
     const mapped = questions.map((q, i) => ({
       id: `ai-${Date.now()}-${i}`,
-      subjectId: "ai-generated",
-      topicId: "ai-generated",
-      difficulty: q.difficulty || "medium",
-      type: "mcq",
-      sourceType: "ai",
+      subjectId: 'ai-generated',
+      topicId: 'ai-generated',
+      difficulty: q.difficulty || 'medium',
+      type: 'mcq',
+      sourceType: 'ai',
       question: q.question,
       options: q.options,
       answer: q.answer,
-      explanation: q.explanation || "",
+      explanation: q.explanation || '',
     }));
-    navigate("/practice", {
+    navigate('/practice', {
       state: {
         aiQuestions: mapped,
         aiMeta: {
-          subjectId: "ai-generated",
-          topicId: "ai-generated",
-          label: "AI Generated",
+          subjectId: 'ai-generated',
+          topicId: 'ai-generated',
+          label: 'AI Generated',
         },
       },
     });
@@ -187,7 +137,10 @@ export default function AIStudyLab() {
   return (
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
-        items={[{ label: "Home", to: "/" }, { label: "AI Study Lab" }]}
+        items={[
+          { label: 'Home', to: '/' },
+          { label: 'AI Study Lab' },
+        ]}
       />
 
       <div className="max-w-2xl">
@@ -196,9 +149,7 @@ export default function AIStudyLab() {
             <Brain className="h-6 w-6 text-brand-600" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              AI Study Lab
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">AI Study Lab</h1>
             <p className="text-sm text-ink-500">
               Paste study material. Generate exam-focused content in seconds.
             </p>
@@ -215,12 +166,22 @@ export default function AIStudyLab() {
               <label htmlFor="material" className="block text-sm font-medium">
                 Study Material
               </label>
-              <button
-                type="button"
-                onClick={loadSample}
-                className="text-xs text-brand-600 hover:underline">
-                Load sample
-              </button>
+              <div className="flex gap-3 text-xs">
+                <button
+                  type="button"
+                  onClick={loadSample}
+                  className="text-brand-600 hover:underline"
+                >
+                  Load EN sample
+                </button>
+                <button
+                  type="button"
+                  onClick={loadSampleBn}
+                  className="text-brand-600 hover:underline"
+                >
+                  Load BN sample
+                </button>
+              </div>
             </div>
             <textarea
               id="material"
@@ -231,15 +192,11 @@ export default function AIStudyLab() {
               className="input resize-y font-mono text-sm leading-relaxed"
             />
             <div className="flex items-center justify-between mt-2 text-xs">
-              <span className={tooLong ? "text-red-600" : "text-ink-500"}>
+              <span className={tooLong ? 'text-red-600' : 'text-ink-500'}>
                 {charCount.toLocaleString()} / 20,000 characters
               </span>
-              {tooShort && (
-                <span className="text-amber-600">Minimum 50 characters</span>
-              )}
-              {tooLong && (
-                <span className="text-red-600">Too long — shorten it</span>
-              )}
+              {tooShort && <span className="text-amber-600">Minimum 50 characters</span>}
+              {tooLong && <span className="text-red-600">Too long — shorten it</span>}
             </div>
 
             {material && (
@@ -247,7 +204,8 @@ export default function AIStudyLab() {
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="btn-ghost text-sm">
+                  className="btn-ghost text-sm"
+                >
                   Clear
                 </button>
               </div>
@@ -256,34 +214,41 @@ export default function AIStudyLab() {
 
           {/* Options */}
           <div className="card p-6">
-            <h2 className="font-semibold text-sm mb-4">MCQ Options</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <h2 className="font-semibold text-sm mb-4">Options</h2>
+            <div className="grid gap-4 sm:grid-cols-3">
               <div>
-                <label className="block text-xs text-ink-500 mb-1.5">
-                  Difficulty
-                </label>
+                <label className="block text-xs text-ink-500 mb-1.5">Language</label>
+                <select
+                  value={outputLanguage}
+                  onChange={(e) => setOutputLanguage(e.target.value)}
+                  className="input text-sm"
+                >
+                  <option value="auto">Auto (match source)</option>
+                  <option value="bn">বাংলা (Bangla)</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-ink-500 mb-1.5">Difficulty</label>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="input text-sm">
+                  className="input text-sm"
+                >
                   <option value="easy">Easy</option>
                   <option value="medium">Medium</option>
                   <option value="hard">Hard</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-ink-500 mb-1.5">
-                  How many MCQs
-                </label>
+                <label className="block text-xs text-ink-500 mb-1.5">How many MCQs</label>
                 <input
                   type="number"
                   min={1}
                   max={20}
                   value={mcqCount}
                   onChange={(e) =>
-                    setMcqCount(
-                      Math.min(20, Math.max(1, Number(e.target.value) || 1)),
-                    )
+                    setMcqCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))
                   }
                   className="input text-sm"
                 />
@@ -306,9 +271,10 @@ export default function AIStudyLab() {
                     disabled={!canRun}
                     className={`text-left p-4 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       isRunning
-                        ? "border-brand-500 bg-brand-50"
-                        : "border-ink-200 bg-white hover:border-brand-400 hover:bg-brand-50/40"
-                    }`}>
+                        ? 'border-brand-500 bg-brand-50'
+                        : 'border-ink-200 bg-white hover:border-brand-400 hover:bg-brand-50/40'
+                    }`}
+                  >
                     <div className="flex items-center gap-2 mb-1">
                       {isRunning ? (
                         <Loader2 className="h-4 w-4 text-brand-600 animate-spin" />
@@ -345,15 +311,17 @@ export default function AIStudyLab() {
                 {history.slice(0, 6).map((h) => (
                   <li
                     key={h._id}
-                    className="text-xs border-b border-ink-100 last:border-0 pb-2 last:pb-0">
+                    className="text-xs border-b border-ink-100 last:border-0 pb-2 last:pb-0"
+                  >
                     <div className="flex justify-between items-center gap-2">
                       <span className="font-medium capitalize">{h.kind}</span>
                       <span
                         className={`badge ${
-                          h.status === "success"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-red-50 text-red-700"
-                        }`}>
+                          h.status === 'success'
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-700'
+                        }`}
+                      >
                         {h.status}
                       </span>
                     </div>
@@ -373,14 +341,13 @@ export default function AIStudyLab() {
         <div className="mt-6 card p-4 border-red-200 bg-red-50 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <div className="font-medium text-red-900 text-sm">
-              Generation failed
-            </div>
+            <div className="font-medium text-red-900 text-sm">Generation failed</div>
             <div className="text-sm text-red-800 mt-1">{error}</div>
             <button
               type="button"
-              onClick={() => setError("")}
-              className="text-xs text-red-700 hover:underline mt-2">
+              onClick={() => setError('')}
+              className="text-xs text-red-700 hover:underline mt-2"
+            >
               Dismiss
             </button>
           </div>
@@ -391,13 +358,12 @@ export default function AIStudyLab() {
       {result && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold capitalize">
-              {result.kind} results
-            </h2>
+            <h2 className="text-lg font-semibold capitalize">{result.kind} results</h2>
             <button
               type="button"
               onClick={() => setResult(null)}
-              className="text-sm text-ink-500 hover:text-brand-600 inline-flex items-center gap-1">
+              className="text-sm text-ink-500 hover:text-brand-600 inline-flex items-center gap-1"
+            >
               <RefreshCw className="h-3.5 w-3.5" /> Clear result
             </button>
           </div>
@@ -406,7 +372,7 @@ export default function AIStudyLab() {
             kind={result.kind}
             data={result.data}
             onPractice={
-              result.kind === "mcq"
+              result.kind === 'mcq'
                 ? () => handlePractice(result.data?.questions || [])
                 : null
             }
@@ -418,9 +384,8 @@ export default function AIStudyLab() {
       <div className="mt-12 card p-5 text-xs text-ink-500 flex items-start gap-2">
         <Sparkles className="h-4 w-4 text-brand-600 shrink-0 mt-0.5" />
         <div>
-          AI-generated content is a study aid — always cross-check important
-          facts with reliable sources. AI output is not an official BCS question
-          paper.
+          AI-generated content is a study aid — always cross-check important facts with
+          reliable sources. AI output is not an official BCS question paper.
         </div>
       </div>
     </div>
@@ -435,20 +400,13 @@ function ResultView({ kind, data, onPractice }) {
   if (!data) return <div className="text-sm text-ink-500">No data.</div>;
 
   switch (kind) {
-    case "analyze":
-      return <AnalyzeView data={data} />;
-    case "mcq":
-      return <McqView data={data} onPractice={onPractice} />;
-    case "written":
-      return <WrittenView data={data} />;
-    case "flashcards":
-      return <FlashcardsView data={data} />;
-    case "notes":
-      return <NotesView data={data} />;
-    case "facts":
-      return <FactsView data={data} />;
-    case "memorize":
-      return <MemorizeView data={data} />;
+    case 'analyze':    return <AnalyzeView data={data} />;
+    case 'mcq':        return <McqView data={data} onPractice={onPractice} />;
+    case 'written':    return <WrittenView data={data} />;
+    case 'flashcards': return <FlashcardsView data={data} />;
+    case 'notes':      return <NotesView data={data} />;
+    case 'facts':      return <FactsView data={data} />;
+    case 'memorize':   return <MemorizeView data={data} />;
     default:
       return <pre className="text-xs">{JSON.stringify(data, null, 2)}</pre>;
   }
@@ -470,14 +428,14 @@ function BulletList({ items }) {
       {items.map((item, i) => (
         <li key={i} className="flex gap-2">
           <span className="text-brand-500 shrink-0">•</span>
-          <span>{typeof item === "string" ? item : JSON.stringify(item)}</span>
+          <span>{typeof item === 'string' ? item : JSON.stringify(item)}</span>
         </li>
       ))}
     </ul>
   );
 }
 
-function PairList({ items, keyA = "name", keyB = "explanation" }) {
+function PairList({ items, keyA = 'name', keyB = 'explanation' }) {
   if (!items?.length) return <p className="text-sm text-ink-500">—</p>;
   return (
     <ul className="space-y-2 text-sm">
@@ -501,30 +459,14 @@ function AnalyzeView({ data }) {
           </Section>
         </div>
       )}
-      <Section title="Important Facts">
-        <BulletList items={data.importantFacts} />
-      </Section>
-      <Section title="Key Concepts">
-        <PairList items={data.keyConcepts} />
-      </Section>
-      <Section title="Important Dates">
-        <PairList items={data.importantDates} keyA="date" keyB="event" />
-      </Section>
-      <Section title="Important Names">
-        <PairList items={data.importantNames} keyA="name" keyB="role" />
-      </Section>
-      <Section title="Definitions">
-        <PairList items={data.definitions} keyA="term" keyB="definition" />
-      </Section>
-      <Section title="Potential Exam Points">
-        <BulletList items={data.potentialExamPoints} />
-      </Section>
-      <Section title="Things to Memorize">
-        <BulletList items={data.thingsToMemorize} />
-      </Section>
-      <Section title="Confusing Areas">
-        <BulletList items={data.confusingAreas} />
-      </Section>
+      <Section title="Important Facts"><BulletList items={data.importantFacts} /></Section>
+      <Section title="Key Concepts"><PairList items={data.keyConcepts} /></Section>
+      <Section title="Important Dates"><PairList items={data.importantDates} keyA="date" keyB="event" /></Section>
+      <Section title="Important Names"><PairList items={data.importantNames} keyA="name" keyB="role" /></Section>
+      <Section title="Definitions"><PairList items={data.definitions} keyA="term" keyB="definition" /></Section>
+      <Section title="Potential Exam Points"><BulletList items={data.potentialExamPoints} /></Section>
+      <Section title="Things to Memorize"><BulletList items={data.thingsToMemorize} /></Section>
+      <Section title="Confusing Areas"><BulletList items={data.confusingAreas} /></Section>
     </div>
   );
 }
@@ -547,7 +489,8 @@ function McqView({ data, onPractice }) {
           <button
             type="button"
             onClick={onPractice}
-            className="btn-primary whitespace-nowrap">
+            className="btn-primary whitespace-nowrap"
+          >
             Practice These Questions
           </button>
         </div>
@@ -559,14 +502,10 @@ function McqView({ data, onPractice }) {
             <span>Question {i + 1}</span>
             <div className="flex gap-2">
               {q.difficulty && (
-                <span className="badge bg-ink-100 text-ink-700">
-                  {q.difficulty}
-                </span>
+                <span className="badge bg-ink-100 text-ink-700">{q.difficulty}</span>
               )}
               {q.topic && (
-                <span className="badge bg-brand-50 text-brand-700">
-                  {q.topic}
-                </span>
+                <span className="badge bg-brand-50 text-brand-700">{q.topic}</span>
               )}
             </div>
           </div>
@@ -577,9 +516,10 @@ function McqView({ data, onPractice }) {
                 key={j}
                 className={`px-3 py-2 rounded-md border text-sm flex items-center gap-2 ${
                   j === q.answer
-                    ? "border-green-300 bg-green-50 text-green-900"
-                    : "border-ink-200 bg-white"
-                }`}>
+                    ? 'border-green-300 bg-green-50 text-green-900'
+                    : 'border-ink-200 bg-white'
+                }`}
+              >
                 <span className="h-5 w-5 rounded-full border border-current/30 flex items-center justify-center text-xs font-semibold">
                   {String.fromCharCode(65 + j)}
                 </span>
@@ -607,17 +547,9 @@ function WrittenView({ data }) {
         <div key={i} className="card p-5">
           <div className="flex flex-wrap items-center gap-2 text-xs mb-2">
             <span className="text-ink-500">Question {i + 1}</span>
-            {q.type && (
-              <span className="badge bg-brand-50 text-brand-700">{q.type}</span>
-            )}
-            {q.difficulty && (
-              <span className="badge bg-ink-100 text-ink-700">
-                {q.difficulty}
-              </span>
-            )}
-            {q.topic && (
-              <span className="badge bg-ink-100 text-ink-700">{q.topic}</span>
-            )}
+            {q.type && <span className="badge bg-brand-50 text-brand-700">{q.type}</span>}
+            {q.difficulty && <span className="badge bg-ink-100 text-ink-700">{q.difficulty}</span>}
+            {q.topic && <span className="badge bg-ink-100 text-ink-700">{q.topic}</span>}
           </div>
           <p className="font-medium text-sm">{q.question}</p>
           {q.expectedPoints?.length > 0 && (
@@ -642,7 +574,7 @@ function FlashcardsView({ data }) {
         <div key={i} className="card p-5">
           <div className="text-xs text-ink-500 mb-2">
             Card {i + 1}
-            {c.topic ? ` · ${c.topic}` : ""}
+            {c.topic ? ` · ${c.topic}` : ''}
           </div>
           <div className="font-medium text-sm">{c.front}</div>
           <div className="mt-3 pt-3 border-t border-ink-100 text-sm text-ink-700">
@@ -657,31 +589,13 @@ function FlashcardsView({ data }) {
 function NotesView({ data }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Section title="Key Facts">
-        <BulletList items={data.keyFacts} />
-      </Section>
-      <Section title="Definitions">
-        <PairList items={data.definitions} keyA="term" keyB="definition" />
-      </Section>
-      <Section title="Important Names">
-        <PairList items={data.importantNames} keyA="name" keyB="role" />
-      </Section>
-      <Section title="Important Dates">
-        <PairList items={data.importantDates} keyA="date" keyB="event" />
-      </Section>
-      <Section title="Important Concepts">
-        <PairList
-          items={data.importantConcepts}
-          keyA="name"
-          keyB="explanation"
-        />
-      </Section>
-      <Section title="Common Confusion">
-        <BulletList items={data.commonConfusion} />
-      </Section>
-      <Section title="Quick Revision">
-        <BulletList items={data.quickRevision} />
-      </Section>
+      <Section title="Key Facts"><BulletList items={data.keyFacts} /></Section>
+      <Section title="Definitions"><PairList items={data.definitions} keyA="term" keyB="definition" /></Section>
+      <Section title="Important Names"><PairList items={data.importantNames} keyA="name" keyB="role" /></Section>
+      <Section title="Important Dates"><PairList items={data.importantDates} keyA="date" keyB="event" /></Section>
+      <Section title="Important Concepts"><PairList items={data.importantConcepts} keyA="name" keyB="explanation" /></Section>
+      <Section title="Common Confusion"><BulletList items={data.commonConfusion} /></Section>
+      <Section title="Quick Revision"><BulletList items={data.quickRevision} /></Section>
     </div>
   );
 }
@@ -696,20 +610,17 @@ function FactsView({ data }) {
           <div className="flex-1">
             <div className="text-sm">{f.fact}</div>
             <div className="mt-1 flex gap-2 text-xs">
-              {f.topic && (
-                <span className="badge bg-brand-50 text-brand-700">
-                  {f.topic}
-                </span>
-              )}
+              {f.topic && <span className="badge bg-brand-50 text-brand-700">{f.topic}</span>}
               {f.importance && (
                 <span
                   className={`badge ${
-                    f.importance === "high"
-                      ? "bg-red-50 text-red-700"
-                      : f.importance === "medium"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-ink-100 text-ink-700"
-                  }`}>
+                    f.importance === 'high'
+                      ? 'bg-red-50 text-red-700'
+                      : f.importance === 'medium'
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'bg-ink-100 text-ink-700'
+                  }`}
+                >
                   {f.importance}
                 </span>
               )}
@@ -730,9 +641,7 @@ function MemorizeView({ data }) {
           <BookMarked className="h-4 w-4 text-brand-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="text-sm font-medium">{it.value}</div>
-            {it.why && (
-              <div className="text-xs text-ink-500 mt-1">{it.why}</div>
-            )}
+            {it.why && <div className="text-xs text-ink-500 mt-1">{it.why}</div>}
             {it.type && (
               <div className="mt-1.5">
                 <span className="badge bg-ink-100 text-ink-700">{it.type}</span>

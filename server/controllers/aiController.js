@@ -13,7 +13,13 @@ import AIGeneration from '../models/AIGeneration.js';
 const MAX_CHARS = Number(process.env.AI_MAX_INPUT_CHARS || 20000);
 const DAILY_LIMIT = Number(process.env.AI_DAILY_LIMIT || 30);
 
+const ALLOWED_LANGS = ['auto', 'en', 'bn'];
+
 /* ---------- Helpers ---------- */
+
+function normalizeLanguage(v) {
+  return ALLOWED_LANGS.includes(v) ? v : 'auto';
+}
 
 function validateMaterial(material) {
   if (!material || typeof material !== 'string') {
@@ -23,12 +29,16 @@ function validateMaterial(material) {
   }
   const trimmed = material.trim();
   if (trimmed.length < 50) {
-    const err = new Error('Study material is too short. Paste at least 50 characters.');
+    const err = new Error(
+      'Study material is too short. Paste at least 50 characters.'
+    );
     err.status = 400;
     throw err;
   }
   if (trimmed.length > MAX_CHARS) {
-    const err = new Error(`Study material is too long (max ${MAX_CHARS} characters).`);
+    const err = new Error(
+      `Study material is too long (max ${MAX_CHARS} characters).`
+    );
     err.status = 400;
     throw err;
   }
@@ -73,7 +83,6 @@ async function logGeneration({
       output: output || null,
     });
   } catch (e) {
-    // Logging failure should not fail the response
     console.error('Failed to log AI generation:', e.message);
   }
 }
@@ -118,10 +127,13 @@ function wrap(handler, kind) {
 
 export const analyze = wrap(
   {
-    parse: (body) => ({ material: body?.material }),
-    buildPrompt: ({ material }) => ({
+    parse: (body) => ({
+      material: body?.material,
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
+    }),
+    buildPrompt: ({ material, outputLanguage }) => ({
       systemPrompt: ANALYZE_PROMPT.system,
-      userPrompt: ANALYZE_PROMPT.user(material),
+      userPrompt: ANALYZE_PROMPT.user(material, outputLanguage),
       maxOutputTokens: 2048,
       temperature: 0.3,
     }),
@@ -137,13 +149,21 @@ export const generateMcq = wrap(
       difficulty: ['easy', 'medium', 'hard'].includes(body?.difficulty)
         ? body.difficulty
         : 'medium',
-      style: typeof body?.style === 'string' && body.style.trim()
-        ? body.style.trim().slice(0, 100)
-        : 'BCS preliminary style',
+      style:
+        typeof body?.style === 'string' && body.style.trim()
+          ? body.style.trim().slice(0, 100)
+          : 'BCS preliminary style',
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
     }),
-    buildPrompt: ({ material, count, difficulty, style }) => ({
+    buildPrompt: ({ material, count, difficulty, style, outputLanguage }) => ({
       systemPrompt: MCQ_PROMPT.system,
-      userPrompt: MCQ_PROMPT.user({ material, count, difficulty, style }),
+      userPrompt: MCQ_PROMPT.user({
+        material,
+        count,
+        difficulty,
+        style,
+        outputLanguage,
+      }),
       maxOutputTokens: 3000,
       temperature: 0.5,
     }),
@@ -156,10 +176,11 @@ export const generateWritten = wrap(
     parse: (body) => ({
       material: body?.material,
       count: Math.min(10, Math.max(1, Number(body?.count) || 5)),
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
     }),
-    buildPrompt: ({ material, count }) => ({
+    buildPrompt: ({ material, count, outputLanguage }) => ({
       systemPrompt: WRITTEN_PROMPT.system,
-      userPrompt: WRITTEN_PROMPT.user({ material, count }),
+      userPrompt: WRITTEN_PROMPT.user({ material, count, outputLanguage }),
       maxOutputTokens: 2500,
       temperature: 0.5,
     }),
@@ -172,10 +193,11 @@ export const generateFlashcards = wrap(
     parse: (body) => ({
       material: body?.material,
       count: Math.min(30, Math.max(1, Number(body?.count) || 12)),
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
     }),
-    buildPrompt: ({ material, count }) => ({
+    buildPrompt: ({ material, count, outputLanguage }) => ({
       systemPrompt: FLASHCARD_PROMPT.system,
-      userPrompt: FLASHCARD_PROMPT.user({ material, count }),
+      userPrompt: FLASHCARD_PROMPT.user({ material, count, outputLanguage }),
       maxOutputTokens: 2000,
       temperature: 0.4,
     }),
@@ -185,10 +207,13 @@ export const generateFlashcards = wrap(
 
 export const generateNotes = wrap(
   {
-    parse: (body) => ({ material: body?.material }),
-    buildPrompt: ({ material }) => ({
+    parse: (body) => ({
+      material: body?.material,
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
+    }),
+    buildPrompt: ({ material, outputLanguage }) => ({
       systemPrompt: NOTES_PROMPT.system,
-      userPrompt: NOTES_PROMPT.user(material),
+      userPrompt: NOTES_PROMPT.user(material, outputLanguage),
       maxOutputTokens: 2500,
       temperature: 0.3,
     }),
@@ -198,10 +223,13 @@ export const generateNotes = wrap(
 
 export const extractFacts = wrap(
   {
-    parse: (body) => ({ material: body?.material }),
-    buildPrompt: ({ material }) => ({
+    parse: (body) => ({
+      material: body?.material,
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
+    }),
+    buildPrompt: ({ material, outputLanguage }) => ({
       systemPrompt: FACTS_PROMPT.system,
-      userPrompt: FACTS_PROMPT.user(material),
+      userPrompt: FACTS_PROMPT.user(material, outputLanguage),
       maxOutputTokens: 2000,
       temperature: 0.3,
     }),
@@ -211,10 +239,13 @@ export const extractFacts = wrap(
 
 export const extractMemorize = wrap(
   {
-    parse: (body) => ({ material: body?.material }),
-    buildPrompt: ({ material }) => ({
+    parse: (body) => ({
+      material: body?.material,
+      outputLanguage: normalizeLanguage(body?.outputLanguage),
+    }),
+    buildPrompt: ({ material, outputLanguage }) => ({
       systemPrompt: MEMORIZE_PROMPT.system,
-      userPrompt: MEMORIZE_PROMPT.user(material),
+      userPrompt: MEMORIZE_PROMPT.user(material, outputLanguage),
       maxOutputTokens: 2000,
       temperature: 0.3,
     }),
