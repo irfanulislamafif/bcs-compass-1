@@ -1,43 +1,54 @@
-import { useState } from 'react';
-import { KeyRound, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { authApi } from '../lib/api.js';
-import Breadcrumbs from '../components/Breadcrumbs.jsx';
+import { useState } from "react";
+import {
+  KeyRound,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  ShieldCheck,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { authApi } from "../lib/api.js";
+import Breadcrumbs from "../components/Breadcrumbs.jsx";
 
 export default function Settings() {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const { t } = useTranslation();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters.');
+      setError(t("auth.passwordTooShort"));
       return;
     }
     if (newPassword !== confirm) {
-      setError('New passwords do not match.');
+      setError(t("auth.passwordsMismatch"));
       return;
     }
     if (currentPassword === newPassword) {
-      setError('New password must be different from current.');
+      setError(t("common.error"));
       return;
     }
 
     setLoading(true);
     try {
-      const data = await authApi.changePassword({ currentPassword, newPassword });
-      setSuccess(data.message || 'Password updated successfully.');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirm('');
+      const data = await authApi.changePassword({
+        currentPassword,
+        newPassword,
+      });
+      setSuccess(data.message || t("common.save"));
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirm("");
     } catch (err) {
-      setError(err.message || 'Failed to change password.');
+      setError(err.message || t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -47,8 +58,8 @@ export default function Settings() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'Settings' },
+          { label: t("nav.home"), to: "/" },
+          { label: t("settings.title") },
         ]}
       />
 
@@ -58,10 +69,10 @@ export default function Settings() {
             <KeyRound className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-sm text-ink-500">
-              Manage your account and password.
-            </p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+              {t("settings.title")}
+            </h1>
+            <p className="text-sm text-ink-500">{t("settings.subtitle")}</p>
           </div>
         </div>
       </div>
@@ -69,7 +80,7 @@ export default function Settings() {
       <div className="mt-8 max-w-2xl card p-6">
         <div className="flex items-center gap-2 mb-4">
           <ShieldCheck className="h-4 w-4 text-brand-600" />
-          <h2 className="font-semibold">Change Password</h2>
+          <h2 className="font-semibold">{t("settings.changePassword")}</h2>
         </div>
 
         {success && (
@@ -88,7 +99,7 @@ export default function Settings() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              Current password
+              {t("settings.currentPassword")}
             </label>
             <input
               type="password"
@@ -102,7 +113,7 @@ export default function Settings() {
 
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              New password
+              {t("settings.newPassword")}
             </label>
             <input
               type="password"
@@ -112,13 +123,13 @@ export default function Settings() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="input"
-              placeholder="At least 8 characters"
+              placeholder={t("auth.passwordHint")}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              Confirm new password
+              {t("settings.confirmNewPassword")}
             </label>
             <input
               type="password"
@@ -131,17 +142,14 @@ export default function Settings() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary"
-          >
+          <button type="submit" disabled={loading} className="btn-primary">
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Updating…
+                <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                {t("settings.updating")}
               </>
             ) : (
-              'Update Password'
+              t("settings.updatePassword")
             )}
           </button>
         </form>

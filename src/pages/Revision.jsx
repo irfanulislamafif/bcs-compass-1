@@ -1,11 +1,17 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  CalendarClock, CheckCircle2, Clock, RotateCcw, Trash2, BookOpen,
-  ArrowRight, Sparkles,
-} from 'lucide-react';
-import Breadcrumbs from '../components/Breadcrumbs.jsx';
-import EmptyState from '../components/EmptyState.jsx';
+  CalendarClock,
+  CheckCircle2,
+  Clock,
+  RotateCcw,
+  Trash2,
+  BookOpen,
+  Sparkles,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import Breadcrumbs from "../components/Breadcrumbs.jsx";
+import EmptyState from "../components/EmptyState.jsx";
 import {
   getDueToday,
   getUpcoming,
@@ -15,36 +21,15 @@ import {
   unmarkRevision,
   rescheduleRevision,
   removeRevision,
-} from '../lib/revisionStore.js';
-
-const TABS = [
-  { id: 'due', label: 'Due Today' },
-  { id: 'upcoming', label: 'Upcoming' },
-  { id: 'completed', label: 'Completed' },
-];
-
-function fmtDate(ts) {
-  const d = new Date(ts);
-  const today = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
-  const sameDay = (a, b) => a.toDateString() === b.toDateString();
-
-  if (sameDay(d, today)) return 'Today';
-  if (sameDay(d, tomorrow)) return 'Tomorrow';
-  return d.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric',
-  });
-}
+} from "../lib/revisionStore.js";
 
 function daysBetween(a, b) {
   return Math.round((a - b) / (24 * 60 * 60 * 1000));
 }
 
 export default function Revision() {
-  const [tab, setTab] = useState('due');
+  const { t } = useTranslation();
+  const [tab, setTab] = useState("due");
   const [refreshKey, setRefreshKey] = useState(0);
 
   const due = useMemo(getDueToday, [refreshKey]);
@@ -69,81 +54,98 @@ export default function Revision() {
     refresh();
   }
   function handleRemove(id) {
-    if (!window.confirm('Remove this revision item?')) return;
+    if (!window.confirm(t("revision.removeConfirm"))) return;
     removeRevision(id);
     refresh();
   }
 
-  const list =
-    tab === 'due' ? due : tab === 'upcoming' ? upcoming : completed;
+  function fmtDate(ts) {
+    const d = new Date(ts);
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    const sameDay = (a, b) => a.toDateString() === b.toDateString();
+
+    if (sameDay(d, today)) return t("revision.today");
+    if (sameDay(d, tomorrow)) return t("revision.tomorrow");
+    return d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: d.getFullYear() === today.getFullYear() ? undefined : "numeric",
+    });
+  }
+
+  const list = tab === "due" ? due : tab === "upcoming" ? upcoming : completed;
+
+  const TABS = [
+    { id: "due", label: t("revision.tabDue") },
+    { id: "upcoming", label: t("revision.tabUpcoming") },
+    { id: "completed", label: t("revision.tabCompleted") },
+  ];
 
   return (
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'Revision' },
+          { label: t("nav.home"), to: "/" },
+          { label: t("revision.title") },
         ]}
       />
 
       <div className="max-w-2xl">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
-            <CalendarClock className="h-6 w-6 text-brand-600" />
+          <div className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+            <CalendarClock className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Revision
+              {t("revision.title")}
             </h1>
-            <p className="text-sm text-ink-500">
-              Spaced revision using Day 0, 1, 3, 7, 14, and 30 intervals.
-            </p>
+            <p className="text-sm text-ink-500">{t("revision.subtitle")}</p>
           </div>
         </div>
       </div>
 
-      {/* Summary */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="card p-5">
           <div className="text-xs text-ink-500 flex items-center gap-1">
-            <Clock className="h-3 w-3" /> Due today
+            <Clock className="h-3 w-3" /> {t("revision.dueToday")}
           </div>
-          <div className="mt-2 text-2xl font-bold text-brand-600">
+          <div className="mt-2 text-2xl font-bold text-brand-600 dark:text-brand-400">
             {counts.due}
           </div>
         </div>
         <div className="card p-5">
           <div className="text-xs text-ink-500 flex items-center gap-1">
-            <CalendarClock className="h-3 w-3" /> Upcoming
+            <CalendarClock className="h-3 w-3" /> {t("revision.upcoming")}
           </div>
           <div className="mt-2 text-2xl font-bold">{counts.upcoming}</div>
         </div>
         <div className="card p-5">
           <div className="text-xs text-ink-500 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 text-green-600" /> Completed
+            <CheckCircle2 className="h-3 w-3 text-green-600" />{" "}
+            {t("revision.completed")}
           </div>
-          <div className="mt-2 text-2xl font-bold text-green-600">
+          <div className="mt-2 text-2xl font-bold text-green-600 dark:text-green-400">
             {counts.completed}
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mt-10 border-b border-ink-100">
+      <div className="mt-10 border-b border-ink-100 dark:border-ink-800">
         <div className="flex gap-1 overflow-x-auto">
-          {TABS.map((t) => (
+          {TABS.map((tbb) => (
             <button
-              key={t.id}
+              key={tbb.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => setTab(tbb.id)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                tab === t.id
-                  ? 'border-brand-600 text-brand-700'
-                  : 'border-transparent text-ink-500 hover:text-ink-900'
-              }`}
-            >
-              {t.label}
-              {t.id === 'due' && counts.due > 0 && (
+                tab === tbb.id
+                  ? "border-brand-600 text-brand-700 dark:text-brand-300"
+                  : "border-transparent text-ink-500 hover:text-ink-900 dark:hover:text-white"
+              }`}>
+              {tbb.label}
+              {tbb.id === "due" && counts.due > 0 && (
                 <span className="ml-2 badge bg-brand-600 text-white">
                   {counts.due}
                 </span>
@@ -153,39 +155,38 @@ export default function Revision() {
         </div>
       </div>
 
-      {/* List */}
       <div className="mt-6 space-y-3">
         {list.length === 0 ? (
           <EmptyState
             icon={
-              tab === 'completed'
+              tab === "completed"
                 ? CheckCircle2
-                : tab === 'upcoming'
-                ? CalendarClock
-                : Clock
+                : tab === "upcoming"
+                  ? CalendarClock
+                  : Clock
             }
             title={
-              tab === 'due'
-                ? 'Nothing due today'
-                : tab === 'upcoming'
-                ? 'No upcoming revisions'
-                : 'No completed revisions yet'
+              tab === "due"
+                ? t("revision.nothingDue")
+                : tab === "upcoming"
+                  ? t("revision.noUpcoming")
+                  : t("revision.noCompleted")
             }
             description={
-              tab === 'due'
-                ? 'When you get questions wrong in practice or exams, their topics are automatically scheduled for revision.'
-                : tab === 'upcoming'
-                ? 'Topics you schedule will appear here on their due dates.'
-                : 'Complete a revision session to see it recorded here.'
+              tab === "due"
+                ? t("revision.nothingDueSub")
+                : tab === "upcoming"
+                  ? t("revision.noUpcomingSub")
+                  : t("revision.noCompletedSub")
             }
             action={
-              tab === 'due' ? (
+              tab === "due" ? (
                 <div className="flex flex-wrap gap-2 justify-center">
                   <Link to="/subjects" className="btn-primary">
-                    Practice Topics
+                    {t("revision.practiceTopics")}
                   </Link>
                   <Link to="/exam" className="btn-secondary">
-                    Take an Exam
+                    {t("revision.takeExam")}
                   </Link>
                 </div>
               ) : null
@@ -194,7 +195,7 @@ export default function Revision() {
         ) : (
           list.map((item) => {
             const dueIn = daysBetween(item.dueAt, Date.now());
-            const isOverdue = tab === 'due' && dueIn < 0;
+            const isOverdue = tab === "due" && dueIn < 0;
 
             return (
               <div key={item.id} className="card p-5">
@@ -202,14 +203,13 @@ export default function Revision() {
                   <div className="flex items-start gap-3 min-w-0">
                     <div
                       className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
-                        tab === 'completed'
-                          ? 'bg-green-50 text-green-600'
+                        tab === "completed"
+                          ? "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400"
                           : isOverdue
-                          ? 'bg-red-50 text-red-600'
-                          : 'bg-brand-50 text-brand-600'
-                      }`}
-                    >
-                      {tab === 'completed' ? (
+                            ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400"
+                            : "bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400"
+                      }`}>
+                      {tab === "completed" ? (
                         <CheckCircle2 className="h-5 w-5" />
                       ) : (
                         <Clock className="h-5 w-5" />
@@ -217,17 +217,25 @@ export default function Revision() {
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs text-ink-500">
-                        {item.subjectName} · Day {item.intervalDays}
+                        {t("revision.subjectDay", {
+                          subject: item.subjectName,
+                          day: item.intervalDays,
+                        })}
                       </div>
                       <div className="font-medium truncate">
                         {item.topicName}
                       </div>
                       <div className="text-xs text-ink-500 mt-0.5">
-                        {tab === 'completed'
-                          ? `Completed ${fmtDate(item.completedAt)}`
-                          : `Due ${fmtDate(item.dueAt)}${
-                              isOverdue ? ` · ${Math.abs(dueIn)}d overdue` : ''
-                            }`}
+                        {tab === "completed"
+                          ? t("revision.completedLabel", {
+                              date: fmtDate(item.completedAt),
+                            })
+                          : t("revision.due", { date: fmtDate(item.dueAt) }) +
+                            (isOverdue
+                              ? t("revision.overdue", {
+                                  days: Math.abs(dueIn),
+                                })
+                              : "")}
                       </div>
                     </div>
                   </div>
@@ -235,64 +243,62 @@ export default function Revision() {
                   <div className="flex flex-wrap gap-2">
                     <Link
                       to={`/practice/topic/${item.subjectId}/${item.topicId}`}
-                      className="btn-primary text-sm"
-                    >
-                      <BookOpen className="h-3.5 w-3.5" /> Practice
+                      className="btn-primary text-sm">
+                      <BookOpen className="h-3.5 w-3.5" />{" "}
+                      {t("revision.practice")}
                     </Link>
 
-                    {tab === 'due' && (
+                    {tab === "due" && (
                       <>
                         <button
                           type="button"
                           onClick={() => handleComplete(item.id)}
-                          className="btn-secondary text-sm"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Complete
+                          className="btn-secondary text-sm">
+                          <CheckCircle2 className="h-3.5 w-3.5" />{" "}
+                          {t("revision.complete")}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleReschedule(item.id, 1)}
-                          className="btn-secondary text-sm"
-                        >
-                          <RotateCcw className="h-3.5 w-3.5" /> +1 day
+                          className="btn-secondary text-sm">
+                          <RotateCcw className="h-3.5 w-3.5" />{" "}
+                          {t("revision.plusOneDay")}
                         </button>
                       </>
                     )}
 
-                    {tab === 'upcoming' && (
+                    {tab === "upcoming" && (
                       <>
                         <button
                           type="button"
                           onClick={() => handleComplete(item.id)}
-                          className="btn-secondary text-sm"
-                        >
-                          Complete now
+                          className="btn-secondary text-sm">
+                          {t("revision.completeNow")}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleReschedule(item.id, 1)}
-                          className="btn-secondary text-sm"
-                        >
-                          <RotateCcw className="h-3.5 w-3.5" /> +1 day
+                          className="btn-secondary text-sm">
+                          <RotateCcw className="h-3.5 w-3.5" />{" "}
+                          {t("revision.plusOneDay")}
                         </button>
                       </>
                     )}
 
-                    {tab === 'completed' && (
+                    {tab === "completed" && (
                       <button
                         type="button"
                         onClick={() => handleUnmark(item.id)}
-                        className="btn-secondary text-sm"
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" /> Unmark
+                        className="btn-secondary text-sm">
+                        <RotateCcw className="h-3.5 w-3.5" />{" "}
+                        {t("revision.unmark")}
                       </button>
                     )}
 
                     <button
                       type="button"
                       onClick={() => handleRemove(item.id)}
-                      className="btn-ghost text-sm text-red-600 hover:bg-red-50"
-                    >
+                      className="btn-ghost text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -303,15 +309,12 @@ export default function Revision() {
         )}
       </div>
 
-      {/* Coming soon */}
       <div className="mt-12 card p-6 flex items-start gap-3">
         <Sparkles className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
         <div>
-          <h3 className="font-semibold">Adaptive revision</h3>
+          <h3 className="font-semibold">{t("revision.adaptiveTitle")}</h3>
           <p className="mt-1.5 text-sm text-ink-500">
-            Currently revision intervals follow a fixed Day 0 / 1 / 3 / 7 / 14 / 30
-            schedule. In a future stage, the system will adapt intervals based on
-            your accuracy on each topic.
+            {t("revision.adaptiveText")}
           </p>
         </div>
       </div>

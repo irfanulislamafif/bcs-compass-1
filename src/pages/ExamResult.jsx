@@ -11,6 +11,7 @@ import {
   Layers,
   Percent,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { getSubjectById, getTopicById } from "../data/demoData.jsx";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
 import ProgressBar from "../components/ProgressBar.jsx";
@@ -25,6 +26,7 @@ function fmtDuration(ms) {
 export default function ExamResult() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const state = location.state;
 
   if (!state || !state.results) {
@@ -41,7 +43,6 @@ export default function ExamResult() {
   const unanswered = total - correct - wrong;
   const accuracy = total ? Math.round((correct / total) * 100) : 0;
 
-  /* ---------- Topic-level aggregation ---------- */
   const byTopic = {};
   for (const r of results) {
     const key = `${r.subjectId}::${r.topicId}`;
@@ -57,20 +58,23 @@ export default function ExamResult() {
     if (r.isCorrect) byTopic[key].correct += 1;
   }
 
-  const topicStats = Object.values(byTopic).map((t) => ({
-    ...t,
-    accuracy: t.total ? Math.round((t.correct / t.total) * 100) : 0,
+  const topicStats = Object.values(byTopic).map((tt) => ({
+    ...tt,
+    accuracy: tt.total ? Math.round((tt.correct / tt.total) * 100) : 0,
   }));
 
   const weakTopics = topicStats
-    .filter((t) => t.accuracy < 60)
+    .filter((tt) => tt.accuracy < 60)
     .sort((a, b) => a.accuracy - b.accuracy);
 
-  /* ---------- Subject-level aggregation ---------- */
   const bySubject = {};
   for (const r of results) {
     if (!bySubject[r.subjectId]) {
-      bySubject[r.subjectId] = { subjectId: r.subjectId, total: 0, correct: 0 };
+      bySubject[r.subjectId] = {
+        subjectId: r.subjectId,
+        total: 0,
+        correct: 0,
+      };
     }
     bySubject[r.subjectId].total += 1;
     if (r.isCorrect) bySubject[r.subjectId].correct += 1;
@@ -80,7 +84,6 @@ export default function ExamResult() {
     accuracy: s.total ? Math.round((s.correct / s.total) * 100) : 0,
   }));
 
-  /* ---------- Helpers ---------- */
   function topicName(subjId, topId) {
     return getTopicById(subjId, topId)?.topic?.name || topId;
   }
@@ -104,45 +107,40 @@ export default function ExamResult() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: "Home", to: "/" },
-          { label: "Exams", to: "/exam" },
-          { label: "Result" },
+          { label: t("nav.home"), to: "/" },
+          { label: t("nav.exams"), to: "/exam" },
+          { label: t("result.examResult") },
         ]}
       />
 
-      {/* Auto-submit banner */}
       {autoSubmitted && (
-        <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900">
+        <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-300">
           <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-          <div className="text-sm">
-            Time was up — your exam was submitted automatically. Unanswered
-            questions were marked as incorrect.
-          </div>
+          <div className="text-sm">{t("result.autoSubmitted")}</div>
         </div>
       )}
 
-      {/* Hero */}
       <div className="card p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
-            <Trophy className="h-6 w-6 text-brand-600" />
+          <div className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+            <Trophy className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">
-              Exam Result
+              {t("result.examResult")}
             </h1>
             <p className="text-sm text-ink-500">
               {config?.subjectId
-                ? `${subjectName(config.subjectId)} Exam`
-                : "Mixed Exam"}{" "}
-              · {total} questions
+                ? `${subjectName(config.subjectId)} ${t("examBuilder.presetSubject")}`
+                : t("examBuilder.all")}{" "}
+              · {total} {t("examBuilder.questions")}
             </p>
           </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-4">
           <div>
-            <div className="text-xs text-ink-500">Score</div>
+            <div className="text-xs text-ink-500">{t("result.score")}</div>
             <div className="mt-1 text-2xl font-bold">
               {correct}
               <span className="text-ink-500 text-base font-normal">
@@ -153,52 +151,55 @@ export default function ExamResult() {
           </div>
           <div>
             <div className="text-xs text-ink-500 inline-flex items-center gap-1">
-              <Percent className="h-3 w-3" /> Accuracy
+              <Percent className="h-3 w-3" /> {t("result.accuracy")}
             </div>
             <div className="mt-1 text-2xl font-bold">{accuracy}%</div>
             <ProgressBar value={accuracy} className="mt-2" />
           </div>
           <div>
             <div className="text-xs text-ink-500 inline-flex items-center gap-1">
-              <Clock className="h-3 w-3" /> Time Spent
+              <Clock className="h-3 w-3" /> {t("result.timeSpent")}
             </div>
             <div className="mt-1 text-2xl font-bold">
               {fmtDuration(timeSpentMs)}
             </div>
           </div>
           <div>
-            <div className="text-xs text-ink-500">Breakdown</div>
+            <div className="text-xs text-ink-500">
+              {t("result.correctWrong")}
+            </div>
             <div className="mt-1 text-sm space-y-0.5">
-              <div className="text-green-700">
-                Correct: <span className="font-semibold">{correct}</span>
+              <div className="text-green-700 dark:text-green-400">
+                {t("practice.correct")}:{" "}
+                <span className="font-semibold">{correct}</span>
               </div>
-              <div className="text-red-700">
-                Wrong: <span className="font-semibold">{wrong}</span>
+              <div className="text-red-700 dark:text-red-400">
+                {t("practice.incorrect")}:{" "}
+                <span className="font-semibold">{wrong}</span>
               </div>
               <div className="text-ink-500">
-                Unanswered: <span className="font-semibold">{unanswered}</span>
+                {t("result.notAnswered")}:{" "}
+                <span className="font-semibold">{unanswered}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Actions */}
       <div className="mt-6 flex flex-wrap gap-3">
         <button onClick={retake} className="btn-primary">
-          <RotateCcw className="h-4 w-4" /> Retake Exam
+          <RotateCcw className="h-4 w-4" /> {t("result.retakeExam")}
         </button>
         <Link to="/exam" className="btn-secondary">
-          Create New Exam <ArrowRight className="h-4 w-4" />
+          {t("result.createNewExam")} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      {/* Subject-wise */}
       {subjectStats.length > 1 && (
         <div className="mt-10 card p-6">
           <div className="flex items-center gap-2 mb-4">
             <Layers className="h-5 w-5 text-ink-500" />
-            <h2 className="font-semibold">Subject-wise performance</h2>
+            <h2 className="font-semibold">{t("result.subjectWise")}</h2>
           </div>
           <ul className="space-y-3">
             {subjectStats.map((s) => (
@@ -218,39 +219,37 @@ export default function ExamResult() {
         </div>
       )}
 
-      {/* Weak topics */}
       {weakTopics.length > 0 && (
         <div className="mt-10 card p-6">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            <h2 className="font-semibold">Recommended next actions</h2>
+            <h2 className="font-semibold">{t("result.recommendedActions")}</h2>
           </div>
           <p className="text-sm text-ink-500 mb-4">
-            These topics are below your overall average. Practicing them will
-            improve your exam performance the fastest.
+            {t("result.weakRecommendation")}
           </p>
           <ul className="space-y-3">
-            {weakTopics.map((t) => (
+            {weakTopics.map((tt) => (
               <li
-                key={`${t.subjectId}-${t.topicId}`}
-                className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-ink-100 last:border-0">
+                key={`${tt.subjectId}-${tt.topicId}`}
+                className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-ink-100 dark:border-ink-800 last:border-0">
                 <div>
                   <div className="font-medium text-sm">
-                    {subjectName(t.subjectId)} →{" "}
-                    {topicName(t.subjectId, t.topicId)}
+                    {subjectName(tt.subjectId)} →{" "}
+                    {topicName(tt.subjectId, tt.topicId)}
                   </div>
                   <div className="text-xs text-ink-500">
-                    {t.correct}/{t.total} correct
+                    {tt.correct}/{tt.total} {t("practice.correct")}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="badge bg-red-50 text-red-700">
-                    <Target className="h-3 w-3" /> {t.accuracy}% accuracy
+                  <span className="badge bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400">
+                    <Target className="h-3 w-3" /> {tt.accuracy}%
                   </span>
                   <Link
-                    to={`/practice/topic/${t.subjectId}/${t.topicId}`}
+                    to={`/practice/topic/${tt.subjectId}/${tt.topicId}`}
                     className="btn-secondary text-sm">
-                    Practice
+                    {t("result.practice")}
                   </Link>
                 </div>
               </li>
@@ -259,9 +258,8 @@ export default function ExamResult() {
         </div>
       )}
 
-      {/* Full review */}
       <div className="mt-10">
-        <h2 className="text-lg font-semibold mb-4">Review all questions</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("result.reviewAll")}</h2>
         <ul className="space-y-3">
           {results.map((r, i) => {
             const q = r.question;
@@ -270,7 +268,7 @@ export default function ExamResult() {
                 <div className="flex items-start gap-3">
                   <div className="shrink-0 mt-0.5">
                     {r.selected == null ? (
-                      <span className="inline-block h-5 w-5 rounded-full bg-ink-200" />
+                      <span className="inline-block h-5 w-5 rounded-full bg-ink-200 dark:bg-ink-700" />
                     ) : r.isCorrect ? (
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : (
@@ -279,22 +277,27 @@ export default function ExamResult() {
                   </div>
                   <div className="flex-1">
                     <div className="text-xs text-ink-500 mb-1">
-                      Question {i + 1} · {subjectName(r.subjectId)} ·{" "}
+                      {t("result.question")} {i + 1} ·{" "}
+                      {subjectName(r.subjectId)} ·{" "}
                       {topicName(r.subjectId, r.topicId)}
                     </div>
                     <div className="font-medium text-sm">{q.question}</div>
 
                     <div className="mt-3 grid gap-1.5 text-sm">
                       <div>
-                        <span className="text-ink-500">Your answer: </span>
+                        <span className="text-ink-500">
+                          {t("result.yourAnswer")}:{" "}
+                        </span>
                         {r.selected == null ? (
                           <span className="text-ink-500 italic">
-                            Not answered
+                            {t("result.notAnswered")}
                           </span>
                         ) : (
                           <span
                             className={
-                              r.isCorrect ? "text-green-700" : "text-red-700"
+                              r.isCorrect
+                                ? "text-green-700 dark:text-green-400"
+                                : "text-red-700 dark:text-red-400"
                             }>
                             {String.fromCharCode(65 + r.selected)}.{" "}
                             {q.options[r.selected]}
@@ -303,8 +306,10 @@ export default function ExamResult() {
                       </div>
                       {!r.isCorrect && (
                         <div>
-                          <span className="text-ink-500">Correct: </span>
-                          <span className="text-green-700">
+                          <span className="text-ink-500">
+                            {t("result.correctAnswer")}:{" "}
+                          </span>
+                          <span className="text-green-700 dark:text-green-400">
                             {String.fromCharCode(65 + q.answer)}.{" "}
                             {q.options[q.answer]}
                           </span>
@@ -312,8 +317,10 @@ export default function ExamResult() {
                       )}
                     </div>
 
-                    <div className="mt-3 text-xs text-ink-600 bg-ink-100/60 border border-ink-200 rounded-md p-3">
-                      <span className="font-semibold">Explanation: </span>
+                    <div className="mt-3 text-xs text-ink-600 dark:text-ink-400 bg-ink-100/60 dark:bg-ink-800/60 border border-ink-200 dark:border-ink-700 rounded-md p-3">
+                      <span className="font-semibold">
+                        {t("practice.explanation")}:{" "}
+                      </span>
                       {q.explanation}
                     </div>
                   </div>

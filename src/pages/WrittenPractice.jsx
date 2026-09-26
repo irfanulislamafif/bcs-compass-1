@@ -3,17 +3,19 @@ import {
   PenLine, Loader2, AlertCircle, Sparkles, CheckCircle2, XCircle,
   TrendingUp, BookOpen, RotateCcw, Send,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { aiApi } from '../lib/api.js';
 import Breadcrumbs from '../components/Breadcrumbs.jsx';
 import ProgressBar from '../components/ProgressBar.jsx';
 
 const LANGS = [
-  { value: 'auto', label: 'Auto (match source)' },
-  { value: 'bn', label: 'বাংলা (Bangla)' },
+  { value: 'auto', label: 'Auto' },
+  { value: 'bn', label: 'বাংলা' },
   { value: 'en', label: 'English' },
 ];
 
 export default function WrittenPractice() {
+  const { t } = useTranslation();
   const [material, setMaterial] = useState('');
   const [outputLanguage, setOutputLanguage] = useState('auto');
   const [questionCount, setQuestionCount] = useState(3);
@@ -28,16 +30,17 @@ export default function WrittenPractice() {
   const [error, setError] = useState('');
 
   const charCount = material.length;
-  const canGenerate = charCount >= 50 && charCount <= 20000 && !loadingQuestions;
+  const canGenerate =
+    charCount >= 50 && charCount <= 20000 && !loadingQuestions;
 
   const active = questions[activeIdx];
 
   function loadSample() {
     setMaterial(
       'The Constitution of Bangladesh was adopted on 4 November 1972 and came into effect on 16 December 1972. ' +
-      'It originally had 153 articles, 11 parts, and 7 schedules. It declares Bangladesh a unitary, independent, ' +
-      'sovereign republic. Fundamental rights are guaranteed in Part III. The Prime Minister is the head of ' +
-      'government and the President is the head of state. Article 7 declares the Constitution the supreme law.'
+        'It originally had 153 articles, 11 parts, and 7 schedules. It declares Bangladesh a unitary, independent, ' +
+        'sovereign republic. Fundamental rights are guaranteed in Part III. The Prime Minister is the head of ' +
+        'government and the President is the head of state. Article 7 declares the Constitution the supreme law.'
     );
   }
 
@@ -56,7 +59,7 @@ export default function WrittenPractice() {
       setQuestions(list);
       setActiveIdx(0);
     } catch (err) {
-      setError(err.message || 'Failed to generate questions.');
+      setError(err.message || t('common.error'));
     } finally {
       setLoadingQuestions(false);
     }
@@ -72,7 +75,7 @@ export default function WrittenPractice() {
   async function submitAnswer() {
     if (!active) return;
     if (userAnswer.trim().length < 20) {
-      setError('Please write at least 20 characters before submitting.');
+      setError(t('writtenPractice.minChars'));
       return;
     }
     setError('');
@@ -87,7 +90,7 @@ export default function WrittenPractice() {
       });
       setEvaluation(data.result);
     } catch (err) {
-      setError(err.message || 'Evaluation failed. Please try again.');
+      setError(err.message || t('common.error'));
     } finally {
       setEvaluating(false);
     }
@@ -105,22 +108,22 @@ export default function WrittenPractice() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'Written Practice' },
+          { label: t('nav.home'), to: '/' },
+          { label: t('writtenPractice.title') },
         ]}
       />
 
       <div className="max-w-2xl">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
-            <PenLine className="h-6 w-6 text-brand-600" />
+          <div className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+            <PenLine className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Written Practice
+              {t('writtenPractice.title')}
             </h1>
             <p className="text-sm text-ink-500">
-              Generate written questions, write answers, and get AI feedback.
+              {t('writtenPractice.subtitle')}
             </p>
           </div>
         </div>
@@ -131,14 +134,14 @@ export default function WrittenPractice() {
           <div className="card p-6">
             <div className="flex items-center justify-between mb-2">
               <label htmlFor="material" className="block text-sm font-medium">
-                Study Material
+                {t('writtenPractice.studyMaterial')}
               </label>
               <button
                 type="button"
                 onClick={loadSample}
                 className="text-xs text-brand-600 hover:underline"
               >
-                Load sample
+                {t('writtenPractice.loadSample')}
               </button>
             </div>
             <textarea
@@ -146,17 +149,19 @@ export default function WrittenPractice() {
               value={material}
               onChange={(e) => setMaterial(e.target.value)}
               rows={10}
-              placeholder="Paste a chapter, article, or notes. AI will generate written questions from it."
+              placeholder={t('writtenPractice.pasteHere')}
               className="input resize-y font-mono text-sm leading-relaxed"
             />
             <div className="mt-2 text-xs text-ink-500">
-              {charCount.toLocaleString()} / 20,000 characters
+              {t('writtenPractice.chars', {
+                count: charCount.toLocaleString(),
+              })}
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Output language
+                  {t('writtenPractice.outputLanguage')}
                 </label>
                 <select
                   value={outputLanguage}
@@ -172,7 +177,7 @@ export default function WrittenPractice() {
               </div>
               <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  How many questions
+                  {t('writtenPractice.howManyQuestions')}
                 </label>
                 <input
                   type="number"
@@ -197,17 +202,19 @@ export default function WrittenPractice() {
             >
               {loadingQuestions ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Generating…
+                  <Loader2 className="h-4 w-4 animate-spin" />{' '}
+                  {t('writtenPractice.generating')}
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4" /> Generate Written Questions
+                  <Sparkles className="h-4 w-4" />{' '}
+                  {t('writtenPractice.generateQuestions')}
                 </>
               )}
             </button>
 
             {error && (
-              <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+              <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 text-sm">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -215,27 +222,29 @@ export default function WrittenPractice() {
           </div>
 
           <aside className="card p-5 h-fit">
-            <h3 className="font-semibold text-sm mb-3">How it works</h3>
-            <ol className="space-y-2.5 text-sm text-ink-600">
+            <h3 className="font-semibold text-sm mb-3">
+              {t('writtenPractice.howItWorks')}
+            </h3>
+            <ol className="space-y-2.5 text-sm text-ink-600 dark:text-ink-400">
               <li className="flex gap-2">
                 <span className="text-brand-500 font-semibold">1.</span>
-                Paste study material
+                {t('writtenPractice.howStep1')}
               </li>
               <li className="flex gap-2">
                 <span className="text-brand-500 font-semibold">2.</span>
-                AI generates written questions
+                {t('writtenPractice.howStep2')}
               </li>
               <li className="flex gap-2">
                 <span className="text-brand-500 font-semibold">3.</span>
-                Write your answer
+                {t('writtenPractice.howStep3')}
               </li>
               <li className="flex gap-2">
                 <span className="text-brand-500 font-semibold">4.</span>
-                Get AI feedback with score, strengths, and missing points
+                {t('writtenPractice.howStep4')}
               </li>
             </ol>
             <p className="mt-4 text-xs text-ink-500">
-              AI feedback is a study aid. It is not an official examiner score.
+              {t('writtenPractice.disclaimer')}
             </p>
           </aside>
         </div>
@@ -245,15 +254,18 @@ export default function WrittenPractice() {
         <>
           <div className="mt-8 flex items-center justify-between">
             <div className="text-sm text-ink-500">
-              {questions.length} question{questions.length === 1 ? '' : 's'} ·
-              currently on #{activeIdx + 1}
+              {t('writtenPractice.questionsCount', {
+                count: questions.length,
+              })}{' '}
+              · {t('writtenPractice.currentlyOn', { n: activeIdx + 1 })}
             </div>
             <button
               type="button"
               onClick={reset}
               className="text-sm text-ink-500 hover:text-brand-600 inline-flex items-center gap-1"
             >
-              <RotateCcw className="h-3.5 w-3.5" /> New session
+              <RotateCcw className="h-3.5 w-3.5" />{' '}
+              {t('writtenPractice.newSession')}
             </button>
           </div>
 
@@ -261,22 +273,17 @@ export default function WrittenPractice() {
             <div className="space-y-6">
               <div className="card p-6">
                 <div className="flex flex-wrap items-center gap-2 text-xs mb-3">
-                  <span className="badge bg-brand-50 text-brand-700">
-                    Question {activeIdx + 1}
+                  <span className="badge bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300">
+                    {t('result.question')} {activeIdx + 1}
                   </span>
                   {active?.type && (
-                    <span className="badge bg-ink-100 text-ink-700">
+                    <span className="badge bg-ink-100 dark:bg-ink-800 text-ink-700 dark:text-ink-300">
                       {active.type}
                     </span>
                   )}
                   {active?.difficulty && (
-                    <span className="badge bg-ink-100 text-ink-700">
+                    <span className="badge bg-ink-100 dark:bg-ink-800 text-ink-700 dark:text-ink-300">
                       {active.difficulty}
-                    </span>
-                  )}
-                  {active?.topic && (
-                    <span className="badge bg-ink-100 text-ink-700">
-                      {active.topic}
                     </span>
                   )}
                 </div>
@@ -285,11 +292,11 @@ export default function WrittenPractice() {
                 {active?.expectedPoints?.length > 0 && (
                   <div className="mt-4">
                     <div className="text-xs font-semibold text-ink-500 mb-1">
-                      Hint — expected points:
+                      {t('writtenPractice.hint')}
                     </div>
                     <ul className="text-sm space-y-1">
                       {active.expectedPoints.map((p, i) => (
-                        <li key={i} className="flex gap-2 text-ink-600">
+                        <li key={i} className="flex gap-2 text-ink-600 dark:text-ink-400">
                           <span className="text-brand-500">•</span>
                           <span>{p}</span>
                         </li>
@@ -305,7 +312,7 @@ export default function WrittenPractice() {
                     htmlFor="answer"
                     className="block text-sm font-medium mb-2"
                   >
-                    Your Answer
+                    {t('writtenPractice.yourAnswer')}
                   </label>
                   <textarea
                     id="answer"
@@ -313,14 +320,18 @@ export default function WrittenPractice() {
                     onChange={(e) => setUserAnswer(e.target.value)}
                     rows={10}
                     maxLength={5000}
-                    placeholder="Write your answer here. Be structured: introduction, main points, conclusion where relevant."
+                    placeholder={t('writtenPractice.answerPlaceholder')}
                     className="input resize-y text-sm leading-relaxed"
                   />
                   <div className="flex items-center justify-between mt-2 text-xs text-ink-500">
-                    <span>{userAnswer.length} / 5000 characters</span>
+                    <span>
+                      {t('writtenPractice.charsCount', {
+                        count: userAnswer.length.toLocaleString(),
+                      })}
+                    </span>
                     {userAnswer.length > 0 && userAnswer.length < 20 && (
                       <span className="text-amber-600">
-                        Minimum 20 characters
+                        {t('writtenPractice.minChars')}
                       </span>
                     )}
                   </div>
@@ -333,17 +344,19 @@ export default function WrittenPractice() {
                   >
                     {evaluating ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" /> Evaluating…
+                        <Loader2 className="h-4 w-4 animate-spin" />{' '}
+                        {t('writtenPractice.evaluating')}
                       </>
                     ) : (
                       <>
-                        <Send className="h-4 w-4" /> Submit for AI Evaluation
+                        <Send className="h-4 w-4" />{' '}
+                        {t('writtenPractice.submitForEval')}
                       </>
                     )}
                   </button>
 
                   {error && (
-                    <div className="mt-3 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+                    <div className="mt-3 flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300 text-sm">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>{error}</span>
                     </div>
@@ -359,12 +372,15 @@ export default function WrittenPractice() {
                     setEvaluation(null);
                     setError('');
                   }}
+                  t={t}
                 />
               )}
             </div>
 
             <aside className="card p-5 h-fit lg:sticky lg:top-20">
-              <h3 className="font-semibold text-sm mb-3">Questions</h3>
+              <h3 className="font-semibold text-sm mb-3">
+                {t('practice.questions')}
+              </h3>
               <ul className="space-y-2">
                 {questions.map((q, i) => {
                   const isCurrent = i === activeIdx;
@@ -375,11 +391,13 @@ export default function WrittenPractice() {
                         onClick={() => selectQuestion(i)}
                         className={`w-full text-left px-3 py-2 rounded-md text-sm border transition-colors ${
                           isCurrent
-                            ? 'border-brand-500 bg-brand-50 text-brand-700'
-                            : 'border-ink-200 bg-white text-ink-700 hover:border-brand-300'
+                            ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300'
+                            : 'border-ink-200 dark:border-ink-700 bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-300 hover:border-brand-300'
                         }`}
                       >
-                        <div className="font-medium">Question {i + 1}</div>
+                        <div className="font-medium">
+                          {t('result.question')} {i + 1}
+                        </div>
                         <div className="text-xs text-ink-500 truncate mt-0.5">
                           {q.question}
                         </div>
@@ -395,20 +413,13 @@ export default function WrittenPractice() {
 
       <div className="mt-12 card p-5 text-xs text-ink-500 flex items-start gap-2">
         <Sparkles className="h-4 w-4 text-brand-600 shrink-0 mt-0.5" />
-        <div>
-          AI feedback is a study aid. It is not an official BCS examiner score.
-          Always cross-check important facts with reliable sources.
-        </div>
+        <div>{t('writtenPractice.disclaimer')}</div>
       </div>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Evaluation view                                                   */
-/* ------------------------------------------------------------------ */
-
-function EvaluationView({ evaluation, userAnswer, onRetry }) {
+function EvaluationView({ evaluation, userAnswer, onRetry, t }) {
   const {
     score,
     maxScore,
@@ -423,19 +434,21 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
 
   const verdictColor =
     {
-      excellent: 'text-green-700 bg-green-50',
-      good: 'text-green-700 bg-green-50',
-      average: 'text-amber-700 bg-amber-50',
-      weak: 'text-orange-700 bg-orange-50',
-      poor: 'text-red-700 bg-red-50',
-    }[verdict] || 'text-ink-700 bg-ink-100';
+      excellent: 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/40',
+      good: 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/40',
+      average: 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40',
+      weak: 'text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40',
+      poor: 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/40',
+    }[verdict] || 'text-ink-700 dark:text-ink-300 bg-ink-100 dark:bg-ink-800';
 
   return (
     <div className="space-y-6">
       <div className="card p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="text-xs text-ink-500">AI-assisted score</div>
+            <div className="text-xs text-ink-500">
+              {t('writtenPractice.aiScore')}
+            </div>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-3xl font-bold">{score}</span>
               <span className="text-ink-500">/ {maxScore}</span>
@@ -450,16 +463,17 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
           </div>
 
           <button type="button" onClick={onRetry} className="btn-secondary">
-            <RotateCcw className="h-4 w-4" /> Rewrite Answer
+            <RotateCcw className="h-4 w-4" />{' '}
+            {t('writtenPractice.rewriteAnswer')}
           </button>
         </div>
       </div>
 
       <div className="card p-5">
         <div className="text-xs font-semibold text-ink-500 mb-2">
-          Your answer
+          {t('writtenPractice.yourAnswerLabel')}
         </div>
-        <p className="text-sm whitespace-pre-wrap text-ink-700">
+        <p className="text-sm whitespace-pre-wrap text-ink-700 dark:text-ink-300">
           {userAnswer}
         </p>
       </div>
@@ -468,7 +482,9 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <h3 className="font-semibold text-sm">Strengths</h3>
+            <h3 className="font-semibold text-sm">
+              {t('writtenPractice.strengths')}
+            </h3>
           </div>
           <ul className="space-y-1.5 text-sm">
             {strengths.map((s, i) => (
@@ -485,7 +501,9 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
             <XCircle className="h-4 w-4 text-red-600" />
-            <h3 className="font-semibold text-sm">Missing Points</h3>
+            <h3 className="font-semibold text-sm">
+              {t('writtenPractice.missingPoints')}
+            </h3>
           </div>
           <ul className="space-y-1.5 text-sm">
             {missingPoints.map((p, i) => (
@@ -502,13 +520,19 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="h-4 w-4 text-amber-600" />
-            <h3 className="font-semibold text-sm">Corrections</h3>
+            <h3 className="font-semibold text-sm">
+              {t('writtenPractice.corrections')}
+            </h3>
           </div>
           <ul className="space-y-3 text-sm">
             {corrections.map((c, i) => (
               <li key={i}>
-                <div className="font-medium text-ink-900">{c.issue}</div>
-                <div className="text-ink-600 mt-0.5">→ {c.fix}</div>
+                <div className="font-medium text-ink-900 dark:text-white">
+                  {c.issue}
+                </div>
+                <div className="text-ink-600 dark:text-ink-400 mt-0.5">
+                  → {c.fix}
+                </div>
               </li>
             ))}
           </ul>
@@ -519,9 +543,11 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="h-4 w-4 text-brand-600" />
-            <h3 className="font-semibold text-sm">Suggested Improvement</h3>
+            <h3 className="font-semibold text-sm">
+              {t('writtenPractice.suggestedImprovement')}
+            </h3>
           </div>
-          <p className="text-sm text-ink-700 whitespace-pre-wrap">
+          <p className="text-sm text-ink-700 dark:text-ink-300 whitespace-pre-wrap">
             {suggestedImprovement}
           </p>
         </div>
@@ -531,7 +557,9 @@ function EvaluationView({ evaluation, userAnswer, onRetry }) {
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
             <BookOpen className="h-4 w-4 text-ink-500" />
-            <h3 className="font-semibold text-sm">Model Answer Outline</h3>
+            <h3 className="font-semibold text-sm">
+              {t('writtenPractice.modelAnswerOutline')}
+            </h3>
           </div>
           <ul className="space-y-1.5 text-sm">
             {modelAnswerOutline.map((p, i) => (

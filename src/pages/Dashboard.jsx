@@ -12,6 +12,7 @@ import {
   Brain,
   KeyRound,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import ProgressBar from "../components/ProgressBar.jsx";
 import StatCard from "../components/StatCard.jsx";
@@ -24,15 +25,9 @@ import {
 } from "../lib/progress.js";
 import { getDueToday, getRevisionCounts } from "../lib/revisionStore.js";
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
-
 export default function Dashboard() {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const overall = useMemo(getOverallStats, []);
   const subjects = useMemo(getSubjectStats, []);
@@ -46,17 +41,23 @@ export default function Dashboard() {
   const topSubjects = subjects.filter((s) => s.total > 0).slice(0, 5);
   const firstName = (user?.name || "aspirant").split(" ")[0];
 
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12
+      ? t("dashboard.greeting_morning")
+      : hour < 18
+        ? t("dashboard.greeting_afternoon")
+        : t("dashboard.greeting_evening");
+
   return (
     <div className="container-page py-10 md:py-14">
-      {/* Welcome */}
       <div className="max-w-2xl">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          {greeting()}, {firstName}!
+          {greeting}, {firstName}!
         </h1>
-        <p className="mt-2 text-ink-500">Ready for today&apos;s preparation?</p>
+        <p className="mt-2 text-ink-500">{t("dashboard.ready")}</p>
       </div>
 
-      {/* Quick actions */}
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Link
           to="/subjects"
@@ -65,8 +66,12 @@ export default function Dashboard() {
             <BookOpen className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-sm">Start Practice</div>
-            <div className="text-xs text-ink-500">Browse subjects</div>
+            <div className="font-semibold text-sm">
+              {t("dashboard.startPractice")}
+            </div>
+            <div className="text-xs text-ink-500">
+              {t("dashboard.browseSubjects")}
+            </div>
           </div>
         </Link>
 
@@ -77,8 +82,12 @@ export default function Dashboard() {
             <Trophy className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-sm">Take Exam</div>
-            <div className="text-xs text-ink-500">Timed test</div>
+            <div className="font-semibold text-sm">
+              {t("dashboard.takeExam")}
+            </div>
+            <div className="text-xs text-ink-500">
+              {t("dashboard.timedTest")}
+            </div>
           </div>
         </Link>
 
@@ -89,9 +98,11 @@ export default function Dashboard() {
             <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-sm">Review Mistakes</div>
+            <div className="font-semibold text-sm">
+              {t("dashboard.reviewMistakes")}
+            </div>
             <div className="text-xs text-ink-500">
-              {mistakeCounts.active} active
+              {mistakeCounts.active} {t("dashboard.active")}
             </div>
           </div>
         </Link>
@@ -103,8 +114,12 @@ export default function Dashboard() {
             <Brain className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-sm">AI Study Lab</div>
-            <div className="text-xs text-ink-500">Generate from notes</div>
+            <div className="font-semibold text-sm">
+              {t("dashboard.aiStudyLab")}
+            </div>
+            <div className="text-xs text-ink-500">
+              {t("dashboard.generateFromNotes")}
+            </div>
           </div>
         </Link>
 
@@ -115,116 +130,123 @@ export default function Dashboard() {
             <KeyRound className="h-5 w-5 text-brand-600 dark:text-brand-400" />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-sm">Settings</div>
-            <div className="text-xs text-ink-500">Password &amp; account</div>
+            <div className="font-semibold text-sm">
+              {t("dashboard.settings")}
+            </div>
+            <div className="text-xs text-ink-500">
+              {t("dashboard.passwordAccount")}
+            </div>
           </div>
         </Link>
       </div>
 
-      {/* Today's target */}
       <div className="mt-10">
-        <h2 className="text-lg font-semibold mb-4">Today&apos;s Target</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {t("dashboard.todaysTarget")}
+        </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="card p-5">
             <div className="flex items-center gap-2 mb-2">
               <ListChecks className="h-4 w-4 text-brand-600" />
-              <span className="text-sm font-medium">Practice</span>
+              <span className="text-sm font-medium">
+                {t("dashboard.practice")}
+              </span>
             </div>
             <p className="text-sm text-ink-500">
-              Answer at least <strong>20 questions</strong> in practice mode to
-              keep momentum.
+              {t("dashboard.practiceGoal")}
             </p>
             <Link to="/subjects" className="btn-secondary mt-4 w-full text-sm">
-              Start Practice
+              {t("dashboard.startPractice")}
             </Link>
           </div>
 
           <div className="card p-5">
             <div className="flex items-center gap-2 mb-2">
               <CalendarClock className="h-4 w-4 text-brand-600" />
-              <span className="text-sm font-medium">Revision</span>
+              <span className="text-sm font-medium">
+                {t("dashboard.revision")}
+              </span>
             </div>
             <p className="text-sm text-ink-500">
               {revisionCounts.due > 0
-                ? `${revisionCounts.due} topic${
-                    revisionCounts.due === 1 ? "" : "s"
-                  } due today.`
-                : "Nothing due today — great job!"}
+                ? t("dashboard.revisionDue", { count: revisionCounts.due })
+                : t("dashboard.revisionNone")}
             </p>
             <Link to="/revision" className="btn-secondary mt-4 w-full text-sm">
-              Open Revision
+              {t("dashboard.openRevision")}
             </Link>
           </div>
 
           <div className="card p-5">
             <div className="flex items-center gap-2 mb-2">
               <Target className="h-4 w-4 text-brand-600" />
-              <span className="text-sm font-medium">Weak Areas</span>
+              <span className="text-sm font-medium">
+                {t("dashboard.weakAreas")}
+              </span>
             </div>
             <p className="text-sm text-ink-500">
               {weak.length > 0
-                ? `${weak.length} weak topic${
-                    weak.length === 1 ? "" : "s"
-                  } detected.`
-                : "No weak topics detected yet."}
+                ? t("dashboard.weakDetected", { count: weak.length })
+                : t("dashboard.noWeak")}
             </p>
             <Link to="/progress" className="btn-secondary mt-4 w-full text-sm">
-              View Progress
+              {t("dashboard.viewProgress")}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Overall stats */}
       <div className="mt-10">
-        <h2 className="text-lg font-semibold mb-4">Overall Progress</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {t("dashboard.overallProgress")}
+        </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Target}
-            label="Overall Accuracy"
+            label={t("dashboard.overallAccuracy")}
             value={`${overall.accuracy}%`}
             sub={`${overall.totalCorrect} / ${overall.totalAttempts}`}
           />
           <StatCard
             icon={ListChecks}
-            label="Questions Attempted"
+            label={t("dashboard.questionsAttempted")}
             value={overall.totalAttempts}
-            sub="All time"
+            sub={t("dashboard.allTime")}
           />
           <StatCard
             icon={Trophy}
-            label="Exams Completed"
+            label={t("dashboard.examsCompleted")}
             value={overall.examsCompleted}
             sub={
               recentExams[0]
-                ? `Last: ${recentExams[0].accuracy}%`
-                : "No exams yet"
+                ? `${t("dashboard.last")}: ${recentExams[0].accuracy}%`
+                : t("dashboard.noExams")
             }
           />
           <StatCard
             icon={Clock}
-            label="Study Time"
-            value={`${Math.round(overall.studyTimeMs / 60000)}m`}
-            sub="Estimated"
+            label={t("dashboard.studyTime")}
+            value={`${Math.round(overall.studyTimeMs / 60000)}${t("examBuilder.mins")}`}
+            sub={t("dashboard.estimated")}
           />
         </div>
       </div>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-3">
-        {/* Subject progress */}
         <div className="lg:col-span-2 card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold">Subject Progress</h2>
+            <h2 className="font-semibold">{t("dashboard.subjectProgress")}</h2>
             <Link
               to="/subjects"
               className="text-sm text-brand-600 hover:underline inline-flex items-center gap-1">
-              All subjects <ArrowRight className="h-3.5 w-3.5" />
+              {t("dashboard.allSubjects")}{" "}
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
           {topSubjects.length === 0 ? (
             <p className="text-sm text-ink-500">
-              Practice questions in any subject to see progress here.
+              {t("dashboard.practicePrompt")}
             </p>
           ) : (
             <ul className="space-y-4">
@@ -247,40 +269,39 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Right column */}
         <div className="space-y-6">
-          {/* Weak areas */}
           <div className="card p-6">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <h2 className="font-semibold text-sm">Weak Areas</h2>
+              <h2 className="font-semibold text-sm">
+                {t("dashboard.weakAreas")}
+              </h2>
             </div>
             {weak.length === 0 ? (
-              <p className="text-sm text-ink-500">
-                No weak topics detected yet. Keep practicing!
-              </p>
+              <p className="text-sm text-ink-500">{t("dashboard.noWeak")}</p>
             ) : (
               <ul className="space-y-3">
-                {weak.slice(0, 4).map((t) => (
-                  <li key={`${t.subjectId}-${t.topicId}`}>
+                {weak.slice(0, 4).map((tt) => (
+                  <li key={`${tt.subjectId}-${tt.topicId}`}>
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <div className="min-w-0">
                         <div className="text-sm font-medium truncate">
-                          {t.topicName}
+                          {tt.topicName}
                         </div>
                         <div className="text-xs text-ink-500 truncate">
-                          {t.subjectName}
+                          {tt.subjectName}
                         </div>
                       </div>
                       <span className="badge bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 shrink-0">
-                        {t.accuracy}%
+                        {tt.accuracy}%
                       </span>
                     </div>
-                    <ProgressBar value={t.accuracy} className="mt-1.5" />
+                    <ProgressBar value={tt.accuracy} className="mt-1.5" />
                     <Link
-                      to={`/practice/topic/${t.subjectId}/${t.topicId}`}
+                      to={`/practice/topic/${tt.subjectId}/${tt.topicId}`}
                       className="text-xs text-brand-600 hover:underline inline-flex items-center gap-1 mt-2">
-                      Practice now <ArrowRight className="h-3 w-3" />
+                      {t("dashboard.practiceNow")}{" "}
+                      <ArrowRight className="h-3 w-3" />
                     </Link>
                   </li>
                 ))}
@@ -288,15 +309,16 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Upcoming revision */}
           <div className="card p-6">
             <div className="flex items-center gap-2 mb-4">
               <CalendarClock className="h-4 w-4 text-brand-600" />
-              <h2 className="font-semibold text-sm">Due Revision</h2>
+              <h2 className="font-semibold text-sm">
+                {t("dashboard.dueRevision")}
+              </h2>
             </div>
             {dueRevisions.length === 0 ? (
               <p className="text-sm text-ink-500">
-                No revision items due right now.
+                {t("dashboard.noRevision")}
               </p>
             ) : (
               <ul className="space-y-2">
@@ -311,33 +333,34 @@ export default function Dashboard() {
               </ul>
             )}
             <Link to="/revision" className="btn-secondary mt-4 w-full text-sm">
-              Open Revision
+              {t("dashboard.openRevision")}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Recent exams */}
       <div className="mt-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Exams</h2>
+          <h2 className="text-lg font-semibold">
+            {t("dashboard.recentExams")}
+          </h2>
           <Link
             to="/progress"
             className="text-sm text-brand-600 hover:underline inline-flex items-center gap-1">
-            View all <ArrowRight className="h-3.5 w-3.5" />
+            {t("dashboard.viewAll")} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {recentExams.length === 0 ? (
           <div className="card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <p className="font-medium">No exams taken yet</p>
+              <p className="font-medium">{t("dashboard.noExamsYet")}</p>
               <p className="text-sm text-ink-500 mt-1">
-                Take your first exam to see results and trends here.
+                {t("dashboard.noExamsSub")}
               </p>
             </div>
             <Link to="/exam" className="btn-primary">
-              Take Exam <ArrowRight className="h-4 w-4" />
+              {t("dashboard.takeExam")} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         ) : (
@@ -345,9 +368,13 @@ export default function Dashboard() {
             <table className="w-full text-sm">
               <thead className="bg-ink-100/60 dark:bg-ink-800/60 text-ink-500 text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="text-left px-4 py-3">Exam</th>
-                  <th className="text-right px-4 py-3">Score</th>
-                  <th className="text-right px-4 py-3">Accuracy</th>
+                  <th className="text-left px-4 py-3">{t("dashboard.exam")}</th>
+                  <th className="text-right px-4 py-3">
+                    {t("dashboard.score")}
+                  </th>
+                  <th className="text-right px-4 py-3">
+                    {t("dashboard.accuracy")}
+                  </th>
                 </tr>
               </thead>
               <tbody>

@@ -12,27 +12,27 @@ import {
   AlertTriangle,
   Settings2,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { demoSubjects, getSubjectById } from "../data/demoData.jsx";
 import { demoQuestions } from "../data/demoQuestions.jsx";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
 import { suggestedDurationMinutes } from "../lib/examHelpers.js";
 
-const DIFFICULTIES = [
-  { value: "any", label: "Any difficulty" },
-  { value: "easy", label: "Easy" },
-  { value: "medium", label: "Medium" },
-  { value: "hard", label: "Hard" },
-];
-
 const PRESETS = [
-  { id: "quick", label: "Quick Test", count: 10, duration: 10 },
-  { id: "topic", label: "Topic Test", count: 15, duration: 15 },
-  { id: "subject", label: "Subject Exam", count: 30, duration: 30 },
-  { id: "mock", label: "Full Mock", count: 50, duration: 50 },
+  { id: "quick", labelKey: "examBuilder.presetQuick", count: 10, duration: 10 },
+  { id: "topic", labelKey: "examBuilder.presetTopic", count: 15, duration: 15 },
+  {
+    id: "subject",
+    labelKey: "examBuilder.presetSubject",
+    count: 30,
+    duration: 30,
+  },
+  { id: "mock", labelKey: "examBuilder.presetMock", count: 50, duration: 50 },
 ];
 
 export default function ExamBuilder() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { subjectId: subjectIdFromPath } = useParams();
   const [searchParams] = useSearchParams();
 
@@ -49,7 +49,6 @@ export default function ExamBuilder() {
 
   const subject = subjectId ? getSubjectById(subjectId) : null;
 
-  /* -------- Availability check -------- */
   const availableQuestions = useMemo(() => {
     let pool = demoQuestions.slice();
     if (subjectId) pool = pool.filter((q) => q.subjectId === subjectId);
@@ -62,21 +61,18 @@ export default function ExamBuilder() {
 
   const effectiveCount = Math.min(count, availableQuestions);
 
-  /* -------- Topic toggle -------- */
   function toggleTopic(tid) {
     setTopicIds((prev) =>
       prev.includes(tid) ? prev.filter((x) => x !== tid) : [...prev, tid],
     );
   }
 
-  /* -------- Preset apply -------- */
   function applyPreset(p) {
     setPresetId(p.id);
     setCount(p.count);
     setDurationMin(p.duration);
   }
 
-  /* -------- Auto-suggest time when count changes without preset -------- */
   function onCountChange(v) {
     const n = Math.max(1, Math.min(100, Number(v) || 1));
     setCount(n);
@@ -84,7 +80,6 @@ export default function ExamBuilder() {
     setDurationMin(suggestedDurationMinutes(n));
   }
 
-  /* -------- Submit -------- */
   function startExam() {
     if (effectiveCount < 1) return;
     const params = new URLSearchParams();
@@ -100,44 +95,40 @@ export default function ExamBuilder() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: "Home", to: "/" },
-          { label: "Subjects", to: "/subjects" },
+          { label: t("nav.home"), to: "/" },
+          { label: t("nav.subjects"), to: "/subjects" },
           subject
             ? { label: subject.name, to: `/subjects/${subject.id}` }
             : null,
-          { label: "Create Exam" },
+          { label: t("examBuilder.title") },
         ].filter(Boolean)}
       />
 
       <Link
         to="/subjects"
         className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600 mb-6">
-        <ArrowLeft className="h-4 w-4" /> Back to Subjects
+        <ArrowLeft className="h-4 w-4" /> {t("examBuilder.backToSubjects")}
       </Link>
 
       <div className="max-w-2xl">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
-            <ClipboardList className="h-6 w-6 text-brand-600" />
+          <div className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+            <ClipboardList className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Create an Exam
+              {t("examBuilder.title")}
             </h1>
-            <p className="text-sm text-ink-500">
-              Configure a timed exam that simulates real BCS exam conditions.
-            </p>
+            <p className="text-sm text-ink-500">{t("examBuilder.subtitle")}</p>
           </div>
         </div>
       </div>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
-        {/* ---------- Config form ---------- */}
         <div className="card p-6 space-y-6">
-          {/* Presets */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Quick presets
+              {t("examBuilder.quickPresets")}
             </label>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
@@ -148,18 +139,17 @@ export default function ExamBuilder() {
                   className={`btn ${
                     presetId === p.id
                       ? "bg-brand-600 text-white hover:bg-brand-700"
-                      : "bg-white text-ink-700 border border-ink-300 hover:bg-ink-100"
+                      : "bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-300 border border-ink-300 dark:border-ink-700 hover:bg-ink-100 dark:hover:bg-ink-800"
                   }`}>
-                  {p.label}
+                  {t(p.labelKey)}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Subject */}
           <div>
             <label htmlFor="subject" className="block text-sm font-medium mb-2">
-              Subject
+              {t("examBuilder.subject")}
             </label>
             <select
               id="subject"
@@ -169,7 +159,7 @@ export default function ExamBuilder() {
                 setTopicIds([]);
               }}
               className="input">
-              <option value="">Mixed — all subjects</option>
+              <option value="">{t("examBuilder.all")}</option>
               {demoSubjects.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -178,57 +168,54 @@ export default function ExamBuilder() {
             </select>
           </div>
 
-          {/* Topics */}
           {subject && (
             <div>
               <label className="block text-sm font-medium mb-2">
-                Topics{" "}
+                {t("examBuilder.topics")}{" "}
                 <span className="text-ink-500 font-normal">
-                  (leave empty to include all topics)
+                  {t("examBuilder.topicsOptional")}
                 </span>
               </label>
               <div className="flex flex-wrap gap-2">
-                {subject.topics.map((t) => (
+                {subject.topics.map((tt) => (
                   <button
-                    key={t.id}
+                    key={tt.id}
                     type="button"
-                    onClick={() => toggleTopic(t.id)}
+                    onClick={() => toggleTopic(tt.id)}
                     className={`badge border ${
-                      topicIds.includes(t.id)
+                      topicIds.includes(tt.id)
                         ? "bg-brand-600 text-white border-brand-600"
-                        : "bg-white text-ink-700 border-ink-300 hover:border-brand-400"
+                        : "bg-white dark:bg-ink-900 text-ink-700 dark:text-ink-300 border-ink-300 dark:border-ink-700 hover:border-brand-400"
                     }`}>
-                    {t.name}
+                    {tt.name}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Difficulty + Count */}
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="difficulty"
                 className="block text-sm font-medium mb-2">
-                Difficulty
+                {t("examBuilder.difficulty")}
               </label>
               <select
                 id="difficulty"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
                 className="input">
-                {DIFFICULTIES.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
-                ))}
+                <option value="any">{t("examBuilder.anyDifficulty")}</option>
+                <option value="easy">{t("examBuilder.easy")}</option>
+                <option value="medium">{t("examBuilder.medium")}</option>
+                <option value="hard">{t("examBuilder.hard")}</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="count" className="block text-sm font-medium mb-2">
-                Number of questions
+                {t("examBuilder.numberOfQuestions")}
               </label>
               <input
                 id="count"
@@ -242,12 +229,11 @@ export default function ExamBuilder() {
             </div>
           </div>
 
-          {/* Duration */}
           <div>
             <label
               htmlFor="duration"
               className="block text-sm font-medium mb-2">
-              Time limit (minutes)
+              {t("examBuilder.timeLimit")}
             </label>
             <input
               id="duration"
@@ -263,14 +249,14 @@ export default function ExamBuilder() {
             />
           </div>
 
-          {/* Warning when not enough questions */}
           {availableQuestions < count && (
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900">
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-300">
               <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
               <div className="text-sm">
-                Only <strong>{availableQuestions}</strong> questions match your
-                filters. The exam will use <strong>{effectiveCount}</strong>{" "}
-                questions.
+                {t("examBuilder.warningText", {
+                  available: availableQuestions,
+                  effective: effectiveCount,
+                })}
               </div>
             </div>
           )}
@@ -281,58 +267,62 @@ export default function ExamBuilder() {
               onClick={startExam}
               disabled={effectiveCount < 1}
               className="btn-primary w-full">
-              <Play className="h-4 w-4" /> Start Exam
+              <Play className="h-4 w-4" /> {t("examBuilder.startExam")}
             </button>
           </div>
         </div>
 
-        {/* ---------- Live summary ---------- */}
         <aside className="card p-6 h-fit">
           <div className="flex items-center gap-2 mb-4">
             <Settings2 className="h-4 w-4 text-ink-500" />
-            <h2 className="font-semibold">Exam Summary</h2>
+            <h2 className="font-semibold">{t("examBuilder.examSummary")}</h2>
           </div>
 
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <dt className="text-ink-500">Subject</dt>
+              <dt className="text-ink-500">{t("examBuilder.subject")}</dt>
               <dd className="font-medium text-right">
-                {subject ? subject.name : "Mixed"}
+                {subject ? subject.name : t("examBuilder.all")}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-500">Topics</dt>
+              <dt className="text-ink-500">{t("examBuilder.topics")}</dt>
               <dd className="font-medium text-right">
-                {topicIds.length === 0 ? "All" : `${topicIds.length} selected`}
+                {topicIds.length === 0
+                  ? t("examBuilder.all")
+                  : `${topicIds.length} ${t("examBuilder.selected")}`}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-500">Difficulty</dt>
+              <dt className="text-ink-500">{t("examBuilder.difficulty")}</dt>
               <dd className="font-medium text-right capitalize">
                 {difficulty}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-500">Questions</dt>
+              <dt className="text-ink-500">{t("examBuilder.questions")}</dt>
               <dd className="font-medium text-right">{effectiveCount}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-500">Time limit</dt>
-              <dd className="font-medium text-right">{durationMin} min</dd>
+              <dt className="text-ink-500">{t("examBuilder.timeLimit")}</dt>
+              <dd className="font-medium text-right">
+                {durationMin} {t("examBuilder.mins")}
+              </dd>
             </div>
-            <div className="flex justify-between border-t border-ink-100 pt-3">
-              <dt className="text-ink-500">Approx. per question</dt>
+            <div className="flex justify-between border-t border-ink-100 dark:border-ink-800 pt-3">
+              <dt className="text-ink-500">{t("examBuilder.perQuestion")}</dt>
               <dd className="font-medium text-right">
                 {effectiveCount
-                  ? `${Math.round((durationMin * 60) / effectiveCount)}s`
+                  ? `${Math.round(
+                      (durationMin * 60) / effectiveCount,
+                    )}${t("examBuilder.perQuestionUnit")}`
                   : "—"}
               </dd>
             </div>
           </dl>
 
           <p className="mt-5 text-xs text-ink-500">
-            In exam mode, correct answers are not shown until you submit. You
-            can mark questions for review and return to them before submitting.
+            {t("examBuilder.infoText")}
           </p>
         </aside>
       </div>

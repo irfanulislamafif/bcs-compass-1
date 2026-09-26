@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   PlusCircle,
@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   Save,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { questionApi } from "../lib/api.js";
 import { demoSubjects } from "../data/demoData.jsx";
 import Breadcrumbs from "../components/Breadcrumbs.jsx";
@@ -15,7 +16,7 @@ import Breadcrumbs from "../components/Breadcrumbs.jsx";
 const DIFFICULTIES = ["easy", "medium", "hard"];
 const LANGS = [
   { value: "en", label: "English" },
-  { value: "bn", label: "বাংলা (Bangla)" },
+  { value: "bn", label: "বাংলা" },
 ];
 
 const EMPTY_FORM = {
@@ -36,6 +37,7 @@ const EMPTY_FORM = {
 
 export default function CreateQuestion() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -69,12 +71,12 @@ export default function CreateQuestion() {
     setError("");
     setSuccess("");
 
-    if (!form.subjectId) return setError("Please choose a subject.");
-    if (!form.topicId.trim()) return setError("Please enter a topic.");
+    if (!form.subjectId) return setError(t("createQuestion.chooseSubject"));
+    if (!form.topicId.trim()) return setError(t("createQuestion.chooseTopic"));
     if (form.question.trim().length < 5)
-      return setError("Question must be at least 5 characters.");
+      return setError(t("auth.passwordTooShort"));
     if (form.options.some((o) => !o.trim()))
-      return setError("All 4 options must be filled in.");
+      return setError(t("auth.passwordTooShort"));
 
     setSaving(true);
     try {
@@ -93,19 +95,19 @@ export default function CreateQuestion() {
         isPublic: form.isPublic,
         tags: form.tags
           .split(",")
-          .map((t) => t.trim())
+          .map((tt) => tt.trim())
           .filter(Boolean)
           .slice(0, 10),
       };
       await questionApi.saveManual(payload);
       setSuccess(
         form.isPublic
-          ? "Saved. Your question is pending admin review before other users can see it."
-          : "Saved to your private question bank.",
+          ? t("createQuestion.savedPublic")
+          : t("createQuestion.savedPrivate"),
       );
       setForm({ ...EMPTY_FORM, subjectId: form.subjectId });
     } catch (err) {
-      setError(err.message || "Failed to save question.");
+      setError(err.message || t("common.error"));
     } finally {
       setSaving(false);
     }
@@ -115,9 +117,9 @@ export default function CreateQuestion() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: "Home", to: "/" },
-          { label: "AI Question Bank", to: "/question-bank" },
-          { label: "Create Question" },
+          { label: t("nav.home"), to: "/" },
+          { label: t("questionBank.title"), to: "/question-bank" },
+          { label: t("createQuestion.title") },
         ]}
       />
 
@@ -125,49 +127,51 @@ export default function CreateQuestion() {
         <Link
           to="/question-bank"
           className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600">
-          <ArrowLeft className="h-4 w-4" /> Back to Question Bank
+          <ArrowLeft className="h-4 w-4" /> {t("createQuestion.backToBank")}
         </Link>
       </div>
 
       <div className="max-w-3xl">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
-            <PlusCircle className="h-6 w-6 text-brand-600" />
+          <div className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+            <PlusCircle className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Create a Question
+              {t("createQuestion.title")}
             </h1>
             <p className="text-sm text-ink-500">
-              Write your own MCQ. It goes to your private bank, or becomes
-              public after admin approval.
+              {t("createQuestion.subtitle")}
             </p>
           </div>
         </div>
 
         {success && (
-          <div className="mb-4 card p-4 bg-green-50 border-green-200 flex items-start gap-3">
+          <div className="mb-4 card p-4 bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-900 flex items-start gap-3">
             <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-            <div className="text-sm text-green-800">{success}</div>
+            <div className="text-sm text-green-800 dark:text-green-300">
+              {success}
+            </div>
           </div>
         )}
         {error && (
-          <div className="mb-4 card p-4 bg-red-50 border-red-200 flex items-start gap-3">
+          <div className="mb-4 card p-4 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-            <div className="text-sm text-red-800">{error}</div>
+            <div className="text-sm text-red-800 dark:text-red-300">
+              {error}
+            </div>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Where */}
           <div className="card p-6">
             <h2 className="font-semibold text-sm mb-4">
-              Where does this question belong?
+              {t("createQuestion.where")}
             </h2>
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="sm:col-span-1">
+              <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Subject *
+                  {t("createQuestion.subject")} *
                 </label>
                 <select
                   value={form.subjectId}
@@ -176,7 +180,7 @@ export default function CreateQuestion() {
                     update("topicId", "");
                   }}
                   className="input text-sm">
-                  <option value="">Choose subject…</option>
+                  <option value="">{t("createQuestion.chooseSubject")}</option>
                   {demoSubjects.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -185,19 +189,19 @@ export default function CreateQuestion() {
                 </select>
               </div>
 
-              <div className="sm:col-span-1">
+              <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Topic *
+                  {t("createQuestion.topic")} *
                 </label>
                 {subject?.topics?.length > 0 ? (
                   <select
                     value={form.topicId}
                     onChange={(e) => update("topicId", e.target.value)}
                     className="input text-sm">
-                    <option value="">Choose topic…</option>
-                    {subject.topics.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name}
+                    <option value="">{t("createQuestion.chooseTopic")}</option>
+                    {subject.topics.map((tt) => (
+                      <option key={tt.id} value={tt.id}>
+                        {tt.name}
                       </option>
                     ))}
                   </select>
@@ -206,36 +210,37 @@ export default function CreateQuestion() {
                     type="text"
                     value={form.topicId}
                     onChange={(e) => update("topicId", e.target.value)}
-                    placeholder="e.g. constitution"
+                    placeholder={t("createQuestion.orEnterTopic")}
                     className="input text-sm"
                   />
                 )}
               </div>
 
-              <div className="sm:col-span-1">
+              <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Section (optional)
+                  {t("createQuestion.section")}
                 </label>
                 <input
                   type="text"
                   value={form.section}
                   onChange={(e) => update("section", e.target.value)}
-                  placeholder="e.g. Section A"
+                  placeholder={t("createQuestion.sectionHint")}
                   className="input text-sm"
                 />
               </div>
             </div>
           </div>
 
-          {/* Question */}
           <div className="card p-6">
-            <h2 className="font-semibold text-sm mb-4">Question</h2>
+            <h2 className="font-semibold text-sm mb-4">
+              {t("createQuestion.question")}
+            </h2>
             <textarea
               value={form.question}
               onChange={(e) => update("question", e.target.value)}
               rows={4}
               maxLength={1000}
-              placeholder="Type your question here…"
+              placeholder={t("createQuestion.questionPlaceholder")}
               className="input resize-y text-sm"
             />
             <div className="text-right text-xs text-ink-500 mt-1">
@@ -243,12 +248,12 @@ export default function CreateQuestion() {
             </div>
           </div>
 
-          {/* Options */}
           <div className="card p-6">
-            <h2 className="font-semibold text-sm mb-4">Options</h2>
+            <h2 className="font-semibold text-sm mb-4">
+              {t("createQuestion.options")}
+            </h2>
             <p className="text-xs text-ink-500 mb-4">
-              Fill all 4 options, then click the radio button next to the
-              correct answer.
+              {t("createQuestion.optionsHint")}
             </p>
             <ul className="space-y-3">
               {["A", "B", "C", "D"].map((letter, i) => (
@@ -260,7 +265,7 @@ export default function CreateQuestion() {
                     className={`shrink-0 h-9 w-9 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-colors ${
                       form.answer === i
                         ? "border-green-500 bg-green-500 text-white"
-                        : "border-ink-300 text-ink-500 hover:border-brand-500"
+                        : "border-ink-300 dark:border-ink-700 text-ink-500 hover:border-brand-500"
                     }`}>
                     {letter}
                   </button>
@@ -268,7 +273,7 @@ export default function CreateQuestion() {
                     type="text"
                     value={form.options[i]}
                     onChange={(e) => updateOption(i, e.target.value)}
-                    placeholder={`Option ${letter}`}
+                    placeholder={t("createQuestion.option", { letter })}
                     maxLength={500}
                     className="input text-sm flex-1"
                   />
@@ -276,32 +281,33 @@ export default function CreateQuestion() {
               ))}
             </ul>
             <div className="mt-4 text-xs text-ink-500">
-              Correct answer: <strong>{"ABCD"[form.answer]}</strong>
+              {t("createQuestion.correctAnswer")}:{" "}
+              <strong>{"ABCD"[form.answer]}</strong>
             </div>
           </div>
 
-          {/* Explanation */}
           <div className="card p-6">
             <h2 className="font-semibold text-sm mb-4">
-              Explanation (optional)
+              {t("createQuestion.explanation")}
             </h2>
             <textarea
               value={form.explanation}
               onChange={(e) => update("explanation", e.target.value)}
               rows={3}
               maxLength={2000}
-              placeholder="Why is the correct answer right?"
+              placeholder={t("createQuestion.explanationPlaceholder")}
               className="input resize-y text-sm"
             />
           </div>
 
-          {/* Metadata */}
           <div className="card p-6">
-            <h2 className="font-semibold text-sm mb-4">Metadata</h2>
+            <h2 className="font-semibold text-sm mb-4">
+              {t("createQuestion.metadata")}
+            </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Difficulty
+                  {t("createQuestion.difficulty")}
                 </label>
                 <select
                   value={form.difficulty}
@@ -317,7 +323,7 @@ export default function CreateQuestion() {
 
               <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Language
+                  {t("createQuestion.language")}
                 </label>
                 <select
                   value={form.language}
@@ -333,7 +339,7 @@ export default function CreateQuestion() {
 
               <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Marks
+                  {t("createQuestion.marks")}
                 </label>
                 <input
                   type="number"
@@ -347,7 +353,7 @@ export default function CreateQuestion() {
 
               <div>
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Time limit (seconds)
+                  {t("createQuestion.timeLimit")}
                 </label>
                 <input
                   type="number"
@@ -361,13 +367,13 @@ export default function CreateQuestion() {
 
               <div className="sm:col-span-2">
                 <label className="block text-xs text-ink-500 mb-1.5">
-                  Tags (comma-separated, optional)
+                  {t("createQuestion.tags")}
                 </label>
                 <input
                   type="text"
                   value={form.tags}
                   onChange={(e) => update("tags", e.target.value)}
-                  placeholder="e.g. constitution, 1972, article"
+                  placeholder={t("createQuestion.tagsPlaceholder")}
                   className="input text-sm"
                 />
               </div>
@@ -382,11 +388,10 @@ export default function CreateQuestion() {
                   />
                   <div>
                     <div className="text-sm font-medium">
-                      Make this question public
+                      {t("createQuestion.makePublic")}
                     </div>
                     <div className="text-xs text-ink-500 mt-0.5">
-                      Public questions are reviewed by admins before other users
-                      can see them. Private questions are only visible to you.
+                      {t("createQuestion.publicNote")}
                     </div>
                   </div>
                 </label>
@@ -394,24 +399,24 @@ export default function CreateQuestion() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-wrap gap-3">
             <button type="submit" disabled={saving} className="btn-primary">
               {saving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+                  <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                  {t("createQuestion.saving")}
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4" /> Save Question
+                  <Save className="h-4 w-4" /> {t("createQuestion.save")}
                 </>
               )}
             </button>
             <button type="button" onClick={reset} className="btn-secondary">
-              Reset Form
+              {t("createQuestion.reset")}
             </button>
             <Link to="/question-bank" className="btn-ghost">
-              Cancel
+              {t("createQuestion.cancel")}
             </Link>
           </div>
         </form>

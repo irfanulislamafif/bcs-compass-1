@@ -1,22 +1,30 @@
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
-  Trophy, Target, CheckCircle2, XCircle, RotateCcw, ArrowRight,
-  AlertTriangle, Home,
-} from 'lucide-react';
-import { getSubjectById, getTopicById } from '../data/demoData.jsx';
-import Breadcrumbs from '../components/Breadcrumbs.jsx';
-import ProgressBar from '../components/ProgressBar.jsx';
+  Trophy,
+  Target,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  ArrowRight,
+  AlertTriangle,
+  Home,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { getSubjectById, getTopicById } from "../data/demoData.jsx";
+import Breadcrumbs from "../components/Breadcrumbs.jsx";
+import ProgressBar from "../components/ProgressBar.jsx";
 
 function fmtDuration(ms) {
   const totalSec = Math.round(ms / 1000);
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
-  return `${m}m ${s.toString().padStart(2, '0')}s`;
+  return `${m}m ${s.toString().padStart(2, "0")}s`;
 }
 
 export default function PracticeResult() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const state = location.state;
 
   if (!state || !state.results) {
@@ -30,11 +38,16 @@ export default function PracticeResult() {
   const wrong = total - correct;
   const accuracy = total ? Math.round((correct / total) * 100) : 0;
 
-  // Aggregate by topic for weak-area detection
   const byTopic = {};
   for (const r of results) {
     const key = r.question.topicId;
-    if (!byTopic[key]) byTopic[key] = { total: 0, correct: 0, subjectId: r.question.subjectId };
+    if (!byTopic[key]) {
+      byTopic[key] = {
+        total: 0,
+        correct: 0,
+        subjectId: r.question.subjectId,
+      };
+    }
     byTopic[key].total += 1;
     if (r.isCorrect) byTopic[key].correct += 1;
   }
@@ -46,10 +59,9 @@ export default function PracticeResult() {
       accuracy: Math.round((v.correct / v.total) * 100),
       total: v.total,
     }))
-    .filter((t) => t.accuracy < 60)
+    .filter((tt) => tt.accuracy < 60)
     .sort((a, b) => a.accuracy - b.accuracy);
 
-  // Look up names
   function topicName(subjId, topId) {
     const found = getTopicById(subjId, topId);
     return found?.topic?.name || topId;
@@ -59,7 +71,8 @@ export default function PracticeResult() {
   }
 
   const subjectObj = subjectId ? getSubjectById(subjectId) : null;
-  const topicObj = subjectId && topicId ? getTopicById(subjectId, topicId)?.topic : null;
+  const topicObj =
+    subjectId && topicId ? getTopicById(subjectId, topicId)?.topic : null;
 
   function retake() {
     if (topicId && subjectId) {
@@ -67,7 +80,7 @@ export default function PracticeResult() {
     } else if (subjectId) {
       navigate(`/practice/subject/${subjectId}`);
     } else {
-      navigate('/subjects');
+      navigate("/subjects");
     }
   }
 
@@ -75,55 +88,66 @@ export default function PracticeResult() {
     <div className="container-page py-10 md:py-14">
       <Breadcrumbs
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'Subjects', to: '/subjects' },
-          subjectObj ? { label: subjectObj.name, to: `/subjects/${subjectObj.id}` } : null,
-          topicObj
-            ? { label: topicObj.name, to: `/topics/${subjectObj.id}/${topicObj.id}` }
+          { label: t("nav.home"), to: "/" },
+          { label: t("nav.subjects"), to: "/subjects" },
+          subjectObj
+            ? { label: subjectObj.name, to: `/subjects/${subjectObj.id}` }
             : null,
-          { label: 'Result' },
+          topicObj
+            ? {
+                label: topicObj.name,
+                to: `/topics/${subjectObj.id}/${topicObj.id}`,
+              }
+            : null,
+          { label: t("result.practiceComplete") },
         ].filter(Boolean)}
       />
 
-      {/* Hero result card */}
       <div className="card p-6 md:p-8">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-lg bg-brand-50 flex items-center justify-center">
-            <Trophy className="h-6 w-6 text-brand-600" />
+          <div className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+            <Trophy className="h-6 w-6 text-brand-600 dark:text-brand-400" />
           </div>
           <div>
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">
-              Practice Complete
+              {t("result.practiceComplete")}
             </h1>
             <p className="text-sm text-ink-500">
               {topicObj
                 ? `${subjectObj.name} · ${topicObj.name}`
                 : subjectObj
-                ? subjectObj.name
-                : 'Mixed practice'}
+                  ? subjectObj.name
+                  : t("common.loading")}
             </p>
           </div>
         </div>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-4">
           <div>
-            <div className="text-xs text-ink-500">Score</div>
+            <div className="text-xs text-ink-500">{t("result.score")}</div>
             <div className="mt-1 text-2xl font-bold">
               {correct}
-              <span className="text-ink-500 text-base font-normal"> / {total}</span>
+              <span className="text-ink-500 text-base font-normal">
+                {" "}
+                / {total}
+              </span>
             </div>
           </div>
           <div>
-            <div className="text-xs text-ink-500">Accuracy</div>
+            <div className="text-xs text-ink-500">{t("result.accuracy")}</div>
             <div className="mt-1 text-2xl font-bold">{accuracy}%</div>
             <ProgressBar value={accuracy} className="mt-2" />
           </div>
           <div>
-            <div className="text-xs text-ink-500">Time Spent</div>
-            <div className="mt-1 text-2xl font-bold">{fmtDuration(timeSpentMs)}</div>
+            <div className="text-xs text-ink-500">{t("result.timeSpent")}</div>
+            <div className="mt-1 text-2xl font-bold">
+              {fmtDuration(timeSpentMs)}
+            </div>
           </div>
           <div>
-            <div className="text-xs text-ink-500">Correct / Wrong</div>
+            <div className="text-xs text-ink-500">
+              {t("result.correctWrong")}
+            </div>
             <div className="mt-1 text-2xl font-bold">
               <span className="text-green-600">{correct}</span>
               <span className="text-ink-300"> / </span>
@@ -133,49 +157,46 @@ export default function PracticeResult() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="mt-6 flex flex-wrap gap-3">
         <button onClick={retake} className="btn-primary">
-          <RotateCcw className="h-4 w-4" /> Retake Practice
+          <RotateCcw className="h-4 w-4" /> {t("result.retakePractice")}
         </button>
         <Link to="/mistakes" className="btn-secondary">
-          Review My Mistakes <ArrowRight className="h-4 w-4" />
+          {t("result.reviewMistakes")} <ArrowRight className="h-4 w-4" />
         </Link>
         <Link to="/subjects" className="btn-ghost">
-          <Home className="h-4 w-4" /> Back to Subjects
+          <Home className="h-4 w-4" /> {t("result.backToSubjects")}
         </Link>
       </div>
 
-      {/* Weak topics */}
       {weakTopics.length > 0 && (
         <div className="mt-10 card p-6">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            <h2 className="font-semibold">Topics you should revisit</h2>
+            <h2 className="font-semibold">{t("result.topicsToRevisit")}</h2>
           </div>
           <ul className="space-y-3">
-            {weakTopics.map((t) => (
+            {weakTopics.map((tt) => (
               <li
-                key={t.topicId}
-                className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-ink-100 last:border-0"
-              >
+                key={tt.topicId}
+                className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-ink-100 dark:border-ink-800 last:border-0">
                 <div>
                   <div className="font-medium text-sm">
-                    {topicName(t.subjectId, t.topicId)}
+                    {topicName(tt.subjectId, tt.topicId)}
                   </div>
                   <div className="text-xs text-ink-500">
-                    {subjectName(t.subjectId)} · {t.total} questions
+                    {subjectName(tt.subjectId)} · {tt.total}{" "}
+                    {t("practice.questions")}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="badge bg-red-50 text-red-700">
-                    <Target className="h-3 w-3" /> {t.accuracy}% accuracy
+                  <span className="badge bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400">
+                    <Target className="h-3 w-3" /> {tt.accuracy}%
                   </span>
                   <Link
-                    to={`/practice/topic/${t.subjectId}/${t.topicId}`}
-                    className="btn-secondary text-sm"
-                  >
-                    Practice
+                    to={`/practice/topic/${tt.subjectId}/${tt.topicId}`}
+                    className="btn-secondary text-sm">
+                    {t("result.practice")}
                   </Link>
                 </div>
               </li>
@@ -184,9 +205,10 @@ export default function PracticeResult() {
         </div>
       )}
 
-      {/* Question review */}
       <div className="mt-10">
-        <h2 className="text-lg font-semibold mb-4">Review your answers</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {t("result.reviewAnswers")}
+        </h2>
         <ul className="space-y-3">
           {results.map((r, i) => (
             <li key={r.question.id} className="card p-5">
@@ -200,40 +222,50 @@ export default function PracticeResult() {
                 </div>
                 <div className="flex-1">
                   <div className="text-xs text-ink-500 mb-1">
-                    Question {i + 1} · {subjectName(r.question.subjectId)} ·{' '}
+                    {t("result.question")} {i + 1} ·{" "}
+                    {subjectName(r.question.subjectId)} ·{" "}
                     {topicName(r.question.subjectId, r.question.topicId)}
                   </div>
-                  <div className="font-medium text-sm">{r.question.question}</div>
+                  <div className="font-medium text-sm">
+                    {r.question.question}
+                  </div>
 
                   <div className="mt-3 grid gap-1.5 text-sm">
                     <div>
-                      <span className="text-ink-500">Your answer: </span>
+                      <span className="text-ink-500">
+                        {t("result.yourAnswer")}:{" "}
+                      </span>
                       {r.selected == null ? (
-                        <span className="text-ink-500 italic">Not answered</span>
+                        <span className="text-ink-500 italic">
+                          {t("result.notAnswered")}
+                        </span>
                       ) : (
                         <span
                           className={
-                            r.isCorrect ? 'text-green-700' : 'text-red-700'
-                          }
-                        >
-                          {String.fromCharCode(65 + r.selected)}.{' '}
+                            r.isCorrect ? "text-green-700" : "text-red-700"
+                          }>
+                          {String.fromCharCode(65 + r.selected)}.{" "}
                           {r.question.options[r.selected]}
                         </span>
                       )}
                     </div>
                     {!r.isCorrect && (
                       <div>
-                        <span className="text-ink-500">Correct: </span>
+                        <span className="text-ink-500">
+                          {t("result.correctAnswer")}:{" "}
+                        </span>
                         <span className="text-green-700">
-                          {String.fromCharCode(65 + r.question.answer)}.{' '}
+                          {String.fromCharCode(65 + r.question.answer)}.{" "}
                           {r.question.options[r.question.answer]}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="mt-3 text-xs text-ink-600 bg-ink-100/60 border border-ink-200 rounded-md p-3">
-                    <span className="font-semibold">Explanation: </span>
+                  <div className="mt-3 text-xs text-ink-600 dark:text-ink-400 bg-ink-100/60 dark:bg-ink-800/60 border border-ink-200 dark:border-ink-700 rounded-md p-3">
+                    <span className="font-semibold">
+                      {t("practice.explanation")}:{" "}
+                    </span>
                     {r.question.explanation}
                   </div>
                 </div>

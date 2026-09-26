@@ -1,29 +1,27 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  Compass,
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react";
-import { authApi } from "../lib/api.js";
+  Compass, ArrowLeft, Loader2, AlertCircle, CheckCircle2,
+} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { authApi } from '../lib/api.js';
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const { t } = useTranslation();
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
     try {
       await authApi.forgotPassword(email);
       setSent(true);
     } catch (err) {
-      setError(err.message || "Failed to send reset email.");
+      setError(err.message || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -43,33 +41,33 @@ export default function ForgotPassword() {
               <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">
-              Check your email
+              {t('auth.checkEmail')}
             </h1>
             <p className="mt-2 text-sm text-ink-500">
-              If <strong>{email}</strong> is registered, we've sent a password
-              reset link. It expires in 30 minutes.
+              {t('auth.resetSent', { email })}
             </p>
             <p className="mt-4 text-xs text-ink-500">
-              Didn't receive it? Check spam, or{" "}
+              {t('auth.didntReceive')}{' '}
               <button
                 type="button"
                 onClick={() => setSent(false)}
-                className="text-brand-600 hover:underline">
-                try again
+                className="text-brand-600 hover:underline"
+              >
+                {t('auth.tryAgain')}
               </button>
               .
             </p>
             <Link to="/login" className="btn-secondary mt-6 w-full">
-              <ArrowLeft className="h-4 w-4" /> Back to Login
+              <ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}
             </Link>
           </>
         ) : (
           <>
             <h1 className="text-2xl font-bold tracking-tight">
-              Forgot password?
+              {t('auth.forgotTitle')}
             </h1>
             <p className="mt-1.5 text-sm text-ink-500">
-              Enter your email. We'll send you a link to choose a new password.
+              {t('auth.forgotSubtitle')}
             </p>
 
             {error && (
@@ -83,8 +81,9 @@ export default function ForgotPassword() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium mb-1.5">
-                  Email
+                  className="block text-sm font-medium mb-1.5"
+                >
+                  {t('auth.email')}
                 </label>
                 <input
                   id="email"
@@ -101,21 +100,24 @@ export default function ForgotPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full">
+                className="btn-primary w-full"
+              >
                 {loading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                    <Loader2 className="h-4 w-4 animate-spin" />{' '}
+                    {t('auth.sending')}
                   </>
                 ) : (
-                  "Send Reset Link"
+                  t('auth.sendResetLink')
                 )}
               </button>
             </form>
 
             <Link
               to="/login"
-              className="mt-6 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600">
-              <ArrowLeft className="h-4 w-4" /> Back to Login
+              className="mt-6 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-brand-600"
+            >
+              <ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}
             </Link>
           </>
         )}
