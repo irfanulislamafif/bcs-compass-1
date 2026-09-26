@@ -4,7 +4,6 @@ import {
   BookOpen,
   ListChecks,
   FileText,
-  Brain,
   CalendarClock,
   Sparkles,
   PenLine,
@@ -62,10 +61,10 @@ export default function TopicDetail() {
       to: `/practice/topic/${subject.id}/${topic.id}`,
     },
     {
-      icon: BookOpen,
-      title: "Study",
-      description: "Read structured material for this topic.",
-      comingSoon: "Coming in Stage 8",
+      icon: PenLine,
+      title: "Written Practice",
+      description: "Generate and answer written questions with AI feedback.",
+      to: "/written-practice",
     },
     {
       icon: Target,
@@ -74,22 +73,22 @@ export default function TopicDetail() {
       to: `/exam?subjectId=${subject.id}&topicId=${topic.id}`,
     },
     {
-      icon: PenLine,
-      title: "Written Practice",
-      description: "Generate and answer written questions for this topic.",
-      comingSoon: "Coming in Stage 12",
+      icon: BookOpen,
+      title: "Study",
+      description: "Read structured material for this topic.",
+      comingSoon: "Coming soon",
     },
     {
       icon: CalendarClock,
       title: "Revision",
       description: "Add this topic to your spaced revision schedule.",
-      comingSoon: "Coming in Stage 8",
+      comingSoon: "Coming soon",
     },
     {
       icon: Sparkles,
       title: "AI Generate Questions",
       description: "Generate new questions from your own study material.",
-      comingSoon: "Coming in Stage 10",
+      to: "/ai-lab",
     },
   ];
 

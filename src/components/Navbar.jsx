@@ -11,7 +11,9 @@ const publicLinks = [
 const authedLinks = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/exam", label: "Exams" },
-  { to: "/ai-lab", label: "AI Lab" }, // ← add this
+  { to: "/ai-lab", label: "AI Lab" },
+  { to: "/question-bank", label: "AI Bank" },
+  { to: "/written-practice", label: "Written" },
   { to: "/revision", label: "Revision" },
   { to: "/mistakes", label: "Mistake Book" },
   { to: "/progress", label: "Progress" },

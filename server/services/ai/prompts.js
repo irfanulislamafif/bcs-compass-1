@@ -19,16 +19,13 @@ Rules you must always follow:
 - Always respond with valid JSON matching the requested schema. No prose outside JSON.
 - Do not include markdown code fences in your response.`;
 
-/**
- * Appends the language directive to any user prompt.
- */
 function withLanguage(prompt, outputLanguage) {
   const langName =
-    outputLanguage === 'bn'
-      ? 'Bangla (বাংলা)'
-      : outputLanguage === 'en'
-      ? 'English'
-      : 'the same language as the source material';
+    outputLanguage === "bn"
+      ? "Bangla (বাংলা)"
+      : outputLanguage === "en"
+        ? "English"
+        : "the same language as the source material";
   return `${prompt}
 
 OUTPUT LANGUAGE: ${langName}.
@@ -36,13 +33,11 @@ Write all question text, options, explanations, notes and facts in ${langName}.
 Keep JSON keys in English.`;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Analyze                                                           */
-/* ------------------------------------------------------------------ */
+/* ---------------- Analyze ---------------- */
 
 export const ANALYZE_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material, outputLanguage = 'auto') =>
+  user: (material, outputLanguage = "auto") =>
     withLanguage(
       `Analyze the following study material for BCS exam preparation.
 
@@ -66,17 +61,15 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
     ),
 };
 
-/* ------------------------------------------------------------------ */
-/*  MCQ generation                                                    */
-/* ------------------------------------------------------------------ */
+/* ---------------- MCQ ---------------- */
 
 export const MCQ_PROMPT = {
   system: SYSTEM_BASE,
-  user: ({ material, count, difficulty, style, outputLanguage = 'auto' }) =>
+  user: ({ material, count, difficulty, style, outputLanguage = "auto" }) =>
     withLanguage(
       `Generate exactly ${count} BCS-style multiple-choice questions from the study material below.
 
@@ -110,17 +103,15 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
     ),
 };
 
-/* ------------------------------------------------------------------ */
-/*  Written questions                                                 */
-/* ------------------------------------------------------------------ */
+/* ---------------- Written ---------------- */
 
 export const WRITTEN_PROMPT = {
   system: SYSTEM_BASE,
-  user: ({ material, count, outputLanguage = 'auto' }) =>
+  user: ({ material, count, outputLanguage = "auto" }) =>
     withLanguage(
       `Generate ${count} written (descriptive) questions from the study material below.
 
@@ -145,17 +136,15 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
     ),
 };
 
-/* ------------------------------------------------------------------ */
-/*  Flashcards                                                        */
-/* ------------------------------------------------------------------ */
+/* ---------------- Flashcards ---------------- */
 
 export const FLASHCARD_PROMPT = {
   system: SYSTEM_BASE,
-  user: ({ material, count, outputLanguage = 'auto' }) =>
+  user: ({ material, count, outputLanguage = "auto" }) =>
     withLanguage(
       `Generate ${count} flashcards from the study material below.
 
@@ -174,17 +163,15 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
     ),
 };
 
-/* ------------------------------------------------------------------ */
-/*  Revision notes                                                    */
-/* ------------------------------------------------------------------ */
+/* ---------------- Notes ---------------- */
 
 export const NOTES_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material, outputLanguage = 'auto') =>
+  user: (material, outputLanguage = "auto") =>
     withLanguage(
       `Generate concise BCS exam revision notes from the study material below.
 
@@ -206,17 +193,15 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
     ),
 };
 
-/* ------------------------------------------------------------------ */
-/*  Important facts                                                   */
-/* ------------------------------------------------------------------ */
+/* ---------------- Facts ---------------- */
 
 export const FACTS_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material, outputLanguage = 'auto') =>
+  user: (material, outputLanguage = "auto") =>
     withLanguage(
       `Extract the most important facts to memorize from the study material below.
 
@@ -234,17 +219,15 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
     ),
 };
 
-/* ------------------------------------------------------------------ */
-/*  What to memorize                                                  */
-/* ------------------------------------------------------------------ */
+/* ---------------- Memorize ---------------- */
 
 export const MEMORIZE_PROMPT = {
   system: SYSTEM_BASE,
-  user: (material, outputLanguage = 'auto') =>
+  user: (material, outputLanguage = "auto") =>
     withLanguage(
       `From the study material below, list only the things a BCS aspirant MUST memorize.
 
@@ -262,6 +245,74 @@ STUDY MATERIAL:
 """
 ${material}
 """`,
-      outputLanguage
+      outputLanguage,
+    ),
+};
+
+/* ---------------- Written Answer Evaluation ---------------- */
+
+export const EVALUATE_PROMPT = {
+  system: SYSTEM_BASE,
+  user: ({
+    question,
+    expectedPoints = [],
+    userAnswer,
+    marks = 10,
+    outputLanguage = "auto",
+  }) =>
+    withLanguage(
+      `Evaluate a BCS aspirant's written answer against the given question.
+
+QUESTION:
+"""
+${question}
+"""
+
+${
+  expectedPoints.length > 0
+    ? `EXPECTED POINTS (the answer should cover these):
+${expectedPoints.map((p, i) => `${i + 1}. ${p}`).join("\n")}
+`
+    : ""
+}
+
+MAXIMUM MARKS: ${marks}
+
+STUDENT'S ANSWER:
+"""
+${userAnswer}
+"""
+
+Evaluate the answer fairly but strictly, like a BCS examiner would. Consider:
+- Content accuracy
+- Completeness relative to the expected points
+- Organization and structure
+- Relevance to the question
+- Use of examples
+- Language quality
+
+Return JSON matching this exact schema:
+
+{
+  "score": 7,
+  "maxScore": ${marks},
+  "percentage": 70,
+  "verdict": "excellent | good | average | weak | poor",
+  "strengths": ["strength 1", "strength 2"],
+  "missingPoints": ["point the answer missed", "..."],
+  "corrections": [{ "issue": "what's wrong", "fix": "how to fix it" }],
+  "suggestedImprovement": "2-4 sentences on how to improve",
+  "modelAnswerOutline": ["key point 1", "key point 2", "key point 3"]
+}
+
+Rules:
+- "score" is an integer from 0 to ${marks}.
+- "percentage" equals round(score / maxScore * 100).
+- "verdict" reflects percentage: >=80 excellent, >=65 good, >=50 average, >=35 weak, else poor.
+- "missingPoints" should only list points genuinely absent from the answer.
+- "corrections" should be specific, not generic.
+- "modelAnswerOutline" gives a bullet outline of what a complete answer would contain.
+- Be honest. If the answer is empty or irrelevant, score it accordingly.`,
+      outputLanguage,
     ),
 };

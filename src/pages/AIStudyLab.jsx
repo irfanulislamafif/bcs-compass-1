@@ -4,7 +4,7 @@ import {
   Sparkles, Brain, ListChecks, PenLine, Layers, FileText, Lightbulb,
   BookMarked, Loader2, AlertCircle, RefreshCw, History,
 } from 'lucide-react';
-import { aiApi } from '../lib/api.js';
+import { aiApi, questionApi } from '../lib/api.js';
 import Breadcrumbs from '../components/Breadcrumbs.jsx';
 
 const ACTIONS = [
@@ -27,9 +27,12 @@ export default function AIStudyLab() {
   const [loading, setLoading] = useState(false);
   const [loadingKind, setLoadingKind] = useState(null);
   const [error, setError] = useState('');
-  const [result, setResult] = useState(null); // { kind, data }
+  const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   const charCount = material.length;
   const tooShort = charCount > 0 && charCount < 50;
@@ -46,7 +49,7 @@ export default function AIStudyLab() {
       const data = await aiApi.history();
       setHistory(data.items || []);
     } catch {
-      // silently ignore — history is optional
+      /* optional */
     } finally {
       setHistoryLoading(false);
     }
@@ -55,6 +58,7 @@ export default function AIStudyLab() {
   async function run(kind) {
     setError('');
     setResult(null);
+    setSaveMessage('');
     setLoading(true);
     setLoadingKind(kind);
     try {
@@ -75,7 +79,11 @@ export default function AIStudyLab() {
         default: throw new Error('Unknown action');
       }
 
-      setResult({ kind, data: data.result });
+      setResult({
+        kind,
+        data: data.result,
+        generationId: data.generationId || null,
+      });
       loadHistory();
     } catch (err) {
       setError(err.message || 'AI generation failed. Please try again.');
@@ -89,6 +97,7 @@ export default function AIStudyLab() {
     setMaterial('');
     setResult(null);
     setError('');
+    setSaveMessage('');
   }
 
   function loadSample() {
@@ -109,7 +118,7 @@ export default function AIStudyLab() {
     );
   }
 
-  function handlePractice(questions) {
+  function handlePractice(questions, generationId = null) {
     const mapped = questions.map((q, i) => ({
       id: `ai-${Date.now()}-${i}`,
       subjectId: 'ai-generated',
@@ -121,6 +130,7 @@ export default function AIStudyLab() {
       options: q.options,
       answer: q.answer,
       explanation: q.explanation || '',
+      generationId,
     }));
     navigate('/practice', {
       state: {
@@ -132,6 +142,33 @@ export default function AIStudyLab() {
         },
       },
     });
+  }
+
+  async function handleSave(questions, generationId = null) {
+    setSaveMessage('');
+    setSaving(true);
+    try {
+      const payload = questions.map((q) => ({
+        subjectId: 'ai-generated',
+        topicId: 'ai-generated',
+        question: q.question,
+        options: q.options,
+        answer: q.answer,
+        explanation: q.explanation || '',
+        difficulty: q.difficulty || 'medium',
+        language: outputLanguage === 'bn' ? 'bn' : 'en',
+        source: 'AI generated (BCS Compass)',
+        generationId,
+      }));
+      const data = await questionApi.save(payload);
+      setSaveMessage(
+        `Saved ${data.saved} question${data.saved === 1 ? '' : 's'} to your bank.`
+      );
+    } catch (err) {
+      setSaveMessage(`Save failed: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -149,7 +186,9 @@ export default function AIStudyLab() {
             <Brain className="h-6 w-6 text-brand-600" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">AI Study Lab</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+              AI Study Lab
+            </h1>
             <p className="text-sm text-ink-500">
               Paste study material. Generate exam-focused content in seconds.
             </p>
@@ -158,9 +197,7 @@ export default function AIStudyLab() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
-        {/* LEFT: input + actions */}
         <div className="space-y-6">
-          {/* Textarea */}
           <div className="card p-6">
             <div className="flex items-center justify-between mb-2">
               <label htmlFor="material" className="block text-sm font-medium">
@@ -198,21 +235,15 @@ export default function AIStudyLab() {
               {tooShort && <span className="text-amber-600">Minimum 50 characters</span>}
               {tooLong && <span className="text-red-600">Too long — shorten it</span>}
             </div>
-
             {material && (
               <div className="mt-3 flex gap-2">
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="btn-ghost text-sm"
-                >
+                <button type="button" onClick={clearAll} className="btn-ghost text-sm">
                   Clear
                 </button>
               </div>
             )}
           </div>
 
-          {/* Options */}
           <div className="card p-6">
             <h2 className="font-semibold text-sm mb-4">Options</h2>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -256,7 +287,6 @@ export default function AIStudyLab() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="card p-6">
             <h2 className="font-semibold text-sm mb-4">Generate</h2>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -291,7 +321,6 @@ export default function AIStudyLab() {
           </div>
         </div>
 
-        {/* RIGHT: history */}
         <aside className="space-y-6">
           <div className="card p-5 h-fit">
             <div className="flex items-center gap-2 mb-3">
@@ -336,7 +365,6 @@ export default function AIStudyLab() {
         </aside>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="mt-6 card p-4 border-red-200 bg-red-50 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
@@ -354,11 +382,12 @@ export default function AIStudyLab() {
         </div>
       )}
 
-      {/* Result */}
       {result && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold capitalize">{result.kind} results</h2>
+            <h2 className="text-lg font-semibold capitalize">
+              {result.kind} results
+            </h2>
             <button
               type="button"
               onClick={() => setResult(null)}
@@ -371,16 +400,26 @@ export default function AIStudyLab() {
           <ResultView
             kind={result.kind}
             data={result.data}
+            saving={saving}
+            saveMessage={saveMessage}
+            onSave={
+              result.kind === 'mcq'
+                ? (questions) => handleSave(questions, result.generationId)
+                : null
+            }
             onPractice={
               result.kind === 'mcq'
-                ? () => handlePractice(result.data?.questions || [])
+                ? () =>
+                    handlePractice(
+                      result.data?.questions || [],
+                      result.generationId
+                    )
                 : null
             }
           />
         </div>
       )}
 
-      {/* Footer note */}
       <div className="mt-12 card p-5 text-xs text-ink-500 flex items-start gap-2">
         <Sparkles className="h-4 w-4 text-brand-600 shrink-0 mt-0.5" />
         <div>
@@ -392,21 +431,32 @@ export default function AIStudyLab() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Result renderer                                                   */
-/* ------------------------------------------------------------------ */
-
-function ResultView({ kind, data, onPractice }) {
+function ResultView({ kind, data, onPractice, onSave, saving, saveMessage }) {
   if (!data) return <div className="text-sm text-ink-500">No data.</div>;
 
   switch (kind) {
-    case 'analyze':    return <AnalyzeView data={data} />;
-    case 'mcq':        return <McqView data={data} onPractice={onPractice} />;
-    case 'written':    return <WrittenView data={data} />;
-    case 'flashcards': return <FlashcardsView data={data} />;
-    case 'notes':      return <NotesView data={data} />;
-    case 'facts':      return <FactsView data={data} />;
-    case 'memorize':   return <MemorizeView data={data} />;
+    case 'analyze':
+      return <AnalyzeView data={data} />;
+    case 'mcq':
+      return (
+        <McqView
+          data={data}
+          onPractice={onPractice}
+          onSave={onSave}
+          saving={saving}
+          saveMessage={saveMessage}
+        />
+      );
+    case 'written':
+      return <WrittenView data={data} />;
+    case 'flashcards':
+      return <FlashcardsView data={data} />;
+    case 'notes':
+      return <NotesView data={data} />;
+    case 'facts':
+      return <FactsView data={data} />;
+    case 'memorize':
+      return <MemorizeView data={data} />;
     default:
       return <pre className="text-xs">{JSON.stringify(data, null, 2)}</pre>;
   }
@@ -459,40 +509,74 @@ function AnalyzeView({ data }) {
           </Section>
         </div>
       )}
-      <Section title="Important Facts"><BulletList items={data.importantFacts} /></Section>
-      <Section title="Key Concepts"><PairList items={data.keyConcepts} /></Section>
-      <Section title="Important Dates"><PairList items={data.importantDates} keyA="date" keyB="event" /></Section>
-      <Section title="Important Names"><PairList items={data.importantNames} keyA="name" keyB="role" /></Section>
-      <Section title="Definitions"><PairList items={data.definitions} keyA="term" keyB="definition" /></Section>
-      <Section title="Potential Exam Points"><BulletList items={data.potentialExamPoints} /></Section>
-      <Section title="Things to Memorize"><BulletList items={data.thingsToMemorize} /></Section>
-      <Section title="Confusing Areas"><BulletList items={data.confusingAreas} /></Section>
+      <Section title="Important Facts">
+        <BulletList items={data.importantFacts} />
+      </Section>
+      <Section title="Key Concepts">
+        <PairList items={data.keyConcepts} />
+      </Section>
+      <Section title="Important Dates">
+        <PairList items={data.importantDates} keyA="date" keyB="event" />
+      </Section>
+      <Section title="Important Names">
+        <PairList items={data.importantNames} keyA="name" keyB="role" />
+      </Section>
+      <Section title="Definitions">
+        <PairList items={data.definitions} keyA="term" keyB="definition" />
+      </Section>
+      <Section title="Potential Exam Points">
+        <BulletList items={data.potentialExamPoints} />
+      </Section>
+      <Section title="Things to Memorize">
+        <BulletList items={data.thingsToMemorize} />
+      </Section>
+      <Section title="Confusing Areas">
+        <BulletList items={data.confusingAreas} />
+      </Section>
     </div>
   );
 }
 
-function McqView({ data, onPractice }) {
+function McqView({ data, onPractice, onSave, saving, saveMessage }) {
   const questions = data.questions || [];
   return (
     <div className="space-y-4">
-      {onPractice && questions.length > 0 && (
-        <div className="card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-50/60 border-brand-100">
-          <div>
-            <div className="font-semibold text-sm">
-              Ready to practice these {questions.length} questions?
+      {questions.length > 0 && (
+        <div className="card p-5 bg-brand-50/60 border-brand-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="font-semibold text-sm">
+                {questions.length} question{questions.length === 1 ? '' : 's'} generated
+              </div>
+              <div className="text-xs text-ink-500 mt-0.5">
+                Practice them now, or save them to your personal question bank for later.
+              </div>
             </div>
-            <div className="text-xs text-ink-500 mt-0.5">
-              They'll load in the practice engine with scoring, mistakes, and
-              explanations — just like built-in questions.
+            <div className="flex flex-wrap gap-2">
+              {onSave && (
+                <button
+                  type="button"
+                  onClick={() => onSave(questions)}
+                  disabled={saving}
+                  className="btn-secondary whitespace-nowrap"
+                >
+                  {saving ? 'Saving…' : 'Save to Bank'}
+                </button>
+              )}
+              {onPractice && (
+                <button
+                  type="button"
+                  onClick={onPractice}
+                  className="btn-primary whitespace-nowrap"
+                >
+                  Practice These Questions
+                </button>
+              )}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onPractice}
-            className="btn-primary whitespace-nowrap"
-          >
-            Practice These Questions
-          </button>
+          {saveMessage && (
+            <div className="mt-3 text-xs text-ink-700">{saveMessage}</div>
+          )}
         </div>
       )}
 
@@ -548,7 +632,9 @@ function WrittenView({ data }) {
           <div className="flex flex-wrap items-center gap-2 text-xs mb-2">
             <span className="text-ink-500">Question {i + 1}</span>
             {q.type && <span className="badge bg-brand-50 text-brand-700">{q.type}</span>}
-            {q.difficulty && <span className="badge bg-ink-100 text-ink-700">{q.difficulty}</span>}
+            {q.difficulty && (
+              <span className="badge bg-ink-100 text-ink-700">{q.difficulty}</span>
+            )}
             {q.topic && <span className="badge bg-ink-100 text-ink-700">{q.topic}</span>}
           </div>
           <p className="font-medium text-sm">{q.question}</p>
@@ -589,13 +675,27 @@ function FlashcardsView({ data }) {
 function NotesView({ data }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Section title="Key Facts"><BulletList items={data.keyFacts} /></Section>
-      <Section title="Definitions"><PairList items={data.definitions} keyA="term" keyB="definition" /></Section>
-      <Section title="Important Names"><PairList items={data.importantNames} keyA="name" keyB="role" /></Section>
-      <Section title="Important Dates"><PairList items={data.importantDates} keyA="date" keyB="event" /></Section>
-      <Section title="Important Concepts"><PairList items={data.importantConcepts} keyA="name" keyB="explanation" /></Section>
-      <Section title="Common Confusion"><BulletList items={data.commonConfusion} /></Section>
-      <Section title="Quick Revision"><BulletList items={data.quickRevision} /></Section>
+      <Section title="Key Facts">
+        <BulletList items={data.keyFacts} />
+      </Section>
+      <Section title="Definitions">
+        <PairList items={data.definitions} keyA="term" keyB="definition" />
+      </Section>
+      <Section title="Important Names">
+        <PairList items={data.importantNames} keyA="name" keyB="role" />
+      </Section>
+      <Section title="Important Dates">
+        <PairList items={data.importantDates} keyA="date" keyB="event" />
+      </Section>
+      <Section title="Important Concepts">
+        <PairList items={data.importantConcepts} keyA="name" keyB="explanation" />
+      </Section>
+      <Section title="Common Confusion">
+        <BulletList items={data.commonConfusion} />
+      </Section>
+      <Section title="Quick Revision">
+        <BulletList items={data.quickRevision} />
+      </Section>
     </div>
   );
 }
@@ -610,7 +710,9 @@ function FactsView({ data }) {
           <div className="flex-1">
             <div className="text-sm">{f.fact}</div>
             <div className="mt-1 flex gap-2 text-xs">
-              {f.topic && <span className="badge bg-brand-50 text-brand-700">{f.topic}</span>}
+              {f.topic && (
+                <span className="badge bg-brand-50 text-brand-700">{f.topic}</span>
+              )}
               {f.importance && (
                 <span
                   className={`badge ${

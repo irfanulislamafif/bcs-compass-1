@@ -7,6 +7,7 @@ import {
   NOTES_PROMPT,
   FACTS_PROMPT,
   MEMORIZE_PROMPT,
+  EVALUATE_PROMPT,
 } from '../services/ai/prompts.js';
 import AIGeneration from '../models/AIGeneration.js';
 
@@ -14,8 +15,6 @@ const MAX_CHARS = Number(process.env.AI_MAX_INPUT_CHARS || 20000);
 const DAILY_LIMIT = Number(process.env.AI_DAILY_LIMIT || 30);
 
 const ALLOWED_LANGS = ['auto', 'en', 'bn'];
-
-/* ---------- Helpers ---------- */
 
 function normalizeLanguage(v) {
   return ALLOWED_LANGS.includes(v) ? v : 'auto';
@@ -73,7 +72,7 @@ async function logGeneration({
   errorMessage,
 }) {
   try {
-    await AIGeneration.create({
+    return await AIGeneration.create({
       userId,
       kind,
       inputChars: material.length,
@@ -84,10 +83,9 @@ async function logGeneration({
     });
   } catch (e) {
     console.error('Failed to log AI generation:', e.message);
+    return null;
   }
 }
-
-/* ---------- Generic wrapper ---------- */
 
 function wrap(handler, kind) {
   return async (req, res, next) => {
@@ -100,7 +98,7 @@ function wrap(handler, kind) {
       const prompt = handler.buildPrompt({ ...payload, material });
       const json = await aiGenerateJSON(prompt);
 
-      await logGeneration({
+      const genLog = await logGeneration({
         userId: req.user._id,
         kind,
         material,
@@ -108,7 +106,12 @@ function wrap(handler, kind) {
         status: 'success',
       });
 
-      res.json({ ok: true, kind, result: json });
+      res.json({
+        ok: true,
+        kind,
+        result: json,
+        generationId: genLog?._id || null,
+      });
     } catch (err) {
       await logGeneration({
         userId: req.user._id,
@@ -122,8 +125,6 @@ function wrap(handler, kind) {
     }
   };
 }
-
-/* ---------- Endpoint handlers ---------- */
 
 export const analyze = wrap(
   {
@@ -253,7 +254,86 @@ export const extractMemorize = wrap(
   'memorize'
 );
 
-/* GET /api/ai/history — last 20 generations for the user */
+/* ------------------------------------------------------------------ */
+/*  POST /api/ai/evaluate                                             */
+/* ------------------------------------------------------------------ */
+
+export async function evaluateWritten(req, res, next) {
+  let material = '';
+  try {
+    const {
+      question,
+      expectedPoints = [],
+      userAnswer,
+      marks = 10,
+      outputLanguage,
+    } = req.body || {};
+
+    if (!question || typeof question !== 'string' || question.trim().length < 10) {
+      return res.status(400).json({ message: 'Question is required.' });
+    }
+    if (
+      !userAnswer ||
+      typeof userAnswer !== 'string' ||
+      userAnswer.trim().length < 20
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Your answer must be at least 20 characters.' });
+    }
+    if (userAnswer.length > 5000) {
+      return res
+        .status(400)
+        .json({ message: 'Answer is too long (max 5000 characters).' });
+    }
+    const maxMarks = Math.min(50, Math.max(1, Number(marks) || 10));
+
+    await enforceDailyLimit(req.user._id);
+
+    const prompt = {
+      systemPrompt: EVALUATE_PROMPT.system,
+      userPrompt: EVALUATE_PROMPT.user({
+        question: question.trim(),
+        expectedPoints: Array.isArray(expectedPoints) ? expectedPoints : [],
+        userAnswer: userAnswer.trim(),
+        marks: maxMarks,
+        outputLanguage: normalizeLanguage(outputLanguage),
+      }),
+      maxOutputTokens: 2500,
+      temperature: 0.3,
+    };
+
+    const json = await aiGenerateJSON(prompt);
+
+    material = `${question}\n---\n${userAnswer}`.slice(0, 2000);
+
+    const genLog = await logGeneration({
+      userId: req.user._id,
+      kind: 'evaluate',
+      material,
+      output: json,
+      status: 'success',
+    });
+
+    res.json({
+      ok: true,
+      kind: 'evaluate',
+      result: json,
+      generationId: genLog?._id || null,
+    });
+  } catch (err) {
+    await logGeneration({
+      userId: req.user._id,
+      kind: 'evaluate',
+      material,
+      output: null,
+      status: 'failed',
+      errorMessage: err.message,
+    });
+    next(err);
+  }
+}
+
 export async function history(req, res, next) {
   try {
     const items = await AIGeneration.find({ userId: req.user._id })

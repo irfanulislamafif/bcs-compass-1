@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Clock, Flag, ChevronLeft, ChevronRight, AlertTriangle, X, Send,
+  Clock, Flag, ChevronLeft, ChevronRight, Send,
 } from 'lucide-react';
 import { buildExamQuestions, formatClock } from '../lib/examHelpers.js';
-import { getSubjectById, getTopicById } from '../data/demoData.jsx';
+import { getSubjectById } from '../data/demoData.jsx';
 import {
   saveExamAttempt,
   recordAttempt,
@@ -19,34 +19,55 @@ const MARKS = {
 
 export default function ExamRunner() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  /* -------- Parse config from URL -------- */
+  /* --- Preloaded questions (AI exam) OR URL config --- */
+  const preloadedQuestions = location.state?.preloadedQuestions || null;
+  const preloadedConfig = location.state?.preloadedConfig || null;
+
   const config = useMemo(() => {
+    if (preloadedConfig) {
+      return {
+        subjectId: '',
+        topicIds: [],
+        difficulty: 'any',
+        count: preloadedQuestions?.length || 0,
+        durationSec: preloadedConfig.durationSec,
+        title: preloadedConfig.title || 'AI Exam',
+      };
+    }
     const subjectId = searchParams.get('subjectId') || undefined;
     const topicIdsRaw = searchParams.get('topicIds');
-    const topicIds = topicIdsRaw ? topicIdsRaw.split(',').filter(Boolean) : undefined;
+    const topicIds = topicIdsRaw
+      ? topicIdsRaw.split(',').filter(Boolean)
+      : undefined;
     const difficulty = searchParams.get('difficulty') || 'any';
     const count = Number(searchParams.get('count') || 20);
     const durationMin = Number(searchParams.get('duration') || 20);
-    return { subjectId, topicIds, difficulty, count, durationSec: durationMin * 60 };
-  }, [searchParams]);
+    return {
+      subjectId,
+      topicIds,
+      difficulty,
+      count,
+      durationSec: durationMin * 60,
+      title: null,
+    };
+  }, [preloadedConfig, preloadedQuestions, searchParams]);
 
-  /* -------- Build questions once -------- */
-  const [questions] = useState(() => buildExamQuestions(config));
+  const [questions] = useState(
+    () => preloadedQuestions || buildExamQuestions(config)
+  );
 
-  /* -------- Per-question state -------- */
   const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState({}); // { [i]: optionIdx }
-  const [marks, setMarks] = useState({}); // { [i]: MARKS.* }
+  const [answers, setAnswers] = useState({});
+  const [marks, setMarks] = useState({});
   const [visited, setVisited] = useState(() => new Set([0]));
 
-  /* -------- Timer -------- */
   const [secondsLeft, setSecondsLeft] = useState(config.durationSec);
   const startRef = useRef(Date.now());
   const submittedRef = useRef(false);
 
-  /* -------- Submit handler (stable) -------- */
   const submitExam = useCallback(
     (auto = false) => {
       if (submittedRef.current) return;
@@ -69,7 +90,6 @@ export default function ExamRunner() {
 
       const score = results.filter((r) => r.isCorrect).length;
 
-      // Persist attempt + mistakes (and auto-schedule revision)
       results.forEach((r) => {
         const base = {
           questionId: r.questionId,
@@ -111,7 +131,6 @@ export default function ExamRunner() {
     [answers, config, navigate, questions]
   );
 
-  /* -------- Timer tick -------- */
   useEffect(() => {
     const id = setInterval(() => {
       setSecondsLeft((s) => {
@@ -127,7 +146,6 @@ export default function ExamRunner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitExam]);
 
-  /* -------- Prevent accidental navigation -------- */
   useEffect(() => {
     function onBeforeUnload(e) {
       if (submittedRef.current) return;
@@ -138,7 +156,6 @@ export default function ExamRunner() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, []);
 
-  /* -------- Track visited -------- */
   useEffect(() => {
     setVisited((prev) => {
       const next = new Set(prev);
@@ -147,7 +164,6 @@ export default function ExamRunner() {
     });
   }, [index]);
 
-  /* -------- Guard: empty -------- */
   if (questions.length === 0) {
     return <Navigate to="/exam" replace />;
   }
@@ -160,9 +176,10 @@ export default function ExamRunner() {
   ).length;
 
   const subject = config.subjectId ? getSubjectById(config.subjectId) : null;
+  const headerTitle =
+    config.title || (subject ? `${subject.name} Exam` : 'Mixed Exam');
   const isLowTime = secondsLeft <= 60;
 
-  /* -------- Handlers -------- */
   function selectOption(i) {
     setAnswers((prev) => ({ ...prev, [index]: i }));
     setMarks((prev) => {
@@ -193,7 +210,6 @@ export default function ExamRunner() {
     if (window.confirm(msg)) submitExam(false);
   }
 
-  /* -------- Palette class -------- */
   function paletteClass(i) {
     const mark = marks[i];
     const answered = answers[i] != null;
@@ -215,21 +231,17 @@ export default function ExamRunner() {
     }
 
     if (isCurrent) cls += ' ring-2 ring-brand-500 ring-offset-1';
-
     return cls;
   }
 
   return (
     <div className="min-h-screen bg-ink-100/40">
-      {/* Top bar */}
       <header className="sticky top-0 z-30 bg-white border-b border-ink-200">
         <div className="container-page">
           <div className="flex items-center justify-between gap-4 py-3">
             <div className="min-w-0">
               <div className="text-xs text-ink-500">Exam in progress</div>
-              <div className="font-semibold truncate">
-                {subject ? subject.name : 'Mixed'} Exam
-              </div>
+              <div className="font-semibold truncate">{headerTitle}</div>
             </div>
 
             <div
@@ -258,7 +270,6 @@ export default function ExamRunner() {
 
       <div className="container-page py-6">
         <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-          {/* Main question area */}
           <div>
             <div className="card p-6">
               <div className="flex items-center justify-between text-xs text-ink-500 mb-3">
@@ -310,7 +321,6 @@ export default function ExamRunner() {
               </ul>
             </div>
 
-            {/* Nav buttons */}
             <div className="mt-4 flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -341,7 +351,6 @@ export default function ExamRunner() {
             </div>
           </div>
 
-          {/* Question palette sidebar */}
           <aside className="card p-5 h-fit lg:sticky lg:top-20">
             <h3 className="font-semibold text-sm mb-3">Question Palette</h3>
 

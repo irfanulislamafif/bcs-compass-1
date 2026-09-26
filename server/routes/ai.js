@@ -8,6 +8,7 @@ import {
   generateNotes,
   extractFacts,
   extractMemorize,
+  evaluateWritten,
   history,
 } from '../controllers/aiController.js';
 
@@ -22,6 +23,7 @@ router.post('/flashcards', generateFlashcards);
 router.post('/notes', generateNotes);
 router.post('/facts', extractFacts);
 router.post('/memorize', extractMemorize);
+router.post('/evaluate', evaluateWritten);
 
 router.get('/history', history);
 
