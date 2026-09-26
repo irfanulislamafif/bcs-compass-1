@@ -209,3 +209,35 @@ export const ragApi = {
   analyze: (payload) =>
     request("/rag/analyze", { method: "POST", body: payload }),
 };
+
+/* ---------- Admin ---------- */
+
+export const adminApi = {
+  stats: () => request("/admin/stats"),
+
+  users: (filters = {}) => {
+    const qs = new URLSearchParams(filters).toString();
+    return request(`/admin/users${qs ? `?${qs}` : ""}`);
+  },
+  updateRole: (id, role) =>
+    request(`/admin/users/${id}`, { method: "PATCH", body: { role } }),
+
+  questions: (filters = {}) => {
+    const qs = new URLSearchParams(filters).toString();
+    return request(`/admin/questions${qs ? `?${qs}` : ""}`);
+  },
+  moderate: (id, status) =>
+    request(`/admin/questions/${id}`, { method: "PATCH", body: { status } }),
+  deleteQuestion: (id) =>
+    request(`/admin/questions/${id}`, { method: "DELETE" }),
+
+  generations: (filters = {}) => {
+    const qs = new URLSearchParams(filters).toString();
+    return request(`/admin/generations${qs ? `?${qs}` : ""}`);
+  },
+
+  materials: (filters = {}) => {
+    const qs = new URLSearchParams(filters).toString();
+    return request(`/admin/materials${qs ? `?${qs}` : ""}`);
+  },
+};

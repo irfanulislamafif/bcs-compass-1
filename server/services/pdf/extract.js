@@ -1,16 +1,18 @@
-import pdfParse from 'pdf-parse';
-import { cleanText } from './clean.js';
+import { extractText } from "unpdf";
+import { cleanText } from "./clean.js";
 
 /**
- * Extracts text from a PDF buffer.
- * Returns { text, pageCount, info }
+ * Extracts text from a PDF buffer using unpdf.
+ * unpdf is ESM-native — no createRequire hacks needed.
  */
 export async function extractPdfText(buffer) {
-  const data = await pdfParse(buffer);
-  const raw = data.text || '';
+  const { text, totalPages } = await extractText(new Uint8Array(buffer), {
+    mergePages: true,
+  });
+
   return {
-    text: cleanText(raw),
-    pageCount: data.numpages || 0,
-    info: data.info || {},
+    text: cleanText(text || ""),
+    pageCount: totalPages || 0,
+    info: {},
   };
 }

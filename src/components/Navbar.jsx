@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Compass, Menu, X, LogOut, User as UserIcon } from 'lucide-react';
+import {
+  Compass, Menu, X, LogOut, User as UserIcon, ShieldAlert,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 const publicLinks = [
@@ -20,12 +22,18 @@ const authedLinks = [
   { to: '/progress', label: 'Progress' },
 ];
 
+const adminLink = { to: '/admin', label: 'Admin' };
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const links = [...publicLinks, ...(isAuthenticated ? authedLinks : [])];
+  const links = [
+    ...publicLinks,
+    ...(isAuthenticated ? authedLinks : []),
+    ...(isAuthenticated && user?.role === 'admin' ? [adminLink] : []),
+  ];
 
   function handleLogout() {
     logout();
@@ -52,13 +60,14 @@ export default function Navbar() {
                 to={l.to}
                 end={l.to === '/'}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
                     isActive
                       ? 'text-brand-700 bg-brand-50'
                       : 'text-ink-700 hover:text-ink-900 hover:bg-ink-100'
                   }`
                 }
               >
+                {l.to === '/admin' && <ShieldAlert className="h-3.5 w-3.5" />}
                 {l.label}
               </NavLink>
             ))}
@@ -112,13 +121,14 @@ export default function Navbar() {
                 end={l.to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `block px-3 py-2 rounded-lg text-sm font-medium ${
+                  `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
                     isActive
                       ? 'bg-brand-50 text-brand-700'
                       : 'text-ink-700 hover:bg-ink-100'
                   }`
                 }
               >
+                {l.to === '/admin' && <ShieldAlert className="h-3.5 w-3.5" />}
                 {l.label}
               </NavLink>
             ))}

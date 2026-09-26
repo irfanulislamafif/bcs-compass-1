@@ -10,6 +10,7 @@ import questionRoutes from "./routes/questions.js";
 import examRoutes from "./routes/exams.js";
 import materialRoutes from "./routes/materials.js";
 import ragRoutes from "./routes/rag.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use("/api/questions", questionRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/rag", aiLimiter, ragRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ message: "Not found" });
