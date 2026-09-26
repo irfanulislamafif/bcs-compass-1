@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+
+    /* Password reset */
+    resetTokenHash: { type: String, default: null, index: true },
+    resetTokenExpires: { type: Date, default: null },
   },
   { timestamps: true }
 );
@@ -38,6 +42,8 @@ userSchema.set('toJSON', {
   transform(_doc, ret) {
     delete ret.passwordHash;
     delete ret.__v;
+    delete ret.resetTokenHash;
+    delete ret.resetTokenExpires;
     return ret;
   },
 });
