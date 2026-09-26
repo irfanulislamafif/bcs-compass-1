@@ -1,4 +1,5 @@
 import { generateGemini } from './gemini.js';
+import { generateGroq } from './groq.js';
 
 /**
  * Provider-agnostic entry point.
@@ -30,6 +31,13 @@ export async function aiGenerate({
   switch (provider) {
     case 'gemini':
       return generateGemini({
+        systemPrompt,
+        userPrompt,
+        maxOutputTokens,
+        temperature,
+      });
+    case 'groq':
+      return generateGroq({
         systemPrompt,
         userPrompt,
         maxOutputTokens,
