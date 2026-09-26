@@ -7,8 +7,11 @@ import {
   LogOut,
   User as UserIcon,
   ShieldAlert,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useTheme } from "../contexts/ThemeContext.jsx";
 
 const publicLinks = [
   { to: "/", label: "Home" },
@@ -32,6 +35,7 @@ const adminLink = { to: "/admin", label: "Admin" };
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
 
   const links = [
@@ -47,19 +51,24 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-ink-100">
+    <header className="sticky top-0 z-40 bg-white/80 dark:bg-ink-950/80 backdrop-blur-md border-b border-ink-200/70 dark:border-ink-800/70">
       <div className="container-page">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-4">
+          {/* Logo */}
           <Link
             to={isAuthenticated ? "/dashboard" : "/"}
-            className="flex items-center gap-2">
-            <Compass className="h-7 w-7 text-brand-600" strokeWidth={2.2} />
+            className="flex items-center gap-2 group">
+            <Compass
+              className="h-7 w-7 text-brand-600 transition-transform group-hover:rotate-12"
+              strokeWidth={2.2}
+            />
             <span className="text-lg font-bold tracking-tight">
               BCS Compass
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-0.5">
             {links.map((l) => (
               <NavLink
                 key={l.to}
@@ -68,8 +77,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
                     isActive
-                      ? "text-brand-700 bg-brand-50"
-                      : "text-ink-700 hover:text-ink-900 hover:bg-ink-100"
+                      ? "text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950/40"
+                      : "text-ink-600 dark:text-ink-300 hover:text-ink-900 dark:hover:text-white hover:bg-ink-100 dark:hover:bg-ink-800"
                   }`
                 }>
                 {l.to === "/admin" && <ShieldAlert className="h-3.5 w-3.5" />}
@@ -78,12 +87,31 @@ export default function Navbar() {
             ))}
           </nav>
 
+          {/* Desktop right side */}
           <div className="hidden lg:flex items-center gap-2">
+            {/* Theme toggle */}
+            <button
+              type="button"
+              onClick={toggle}
+              className="p-2 rounded-lg text-ink-500 dark:text-ink-400 hover:bg-ink-100 dark:hover:bg-ink-800 transition-colors"
+              aria-label="Toggle theme"
+              title={
+                theme === "dark"
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }>
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
+
             {isAuthenticated ? (
               <>
-                <span className="inline-flex items-center gap-2 px-3 py-2 text-sm text-ink-700">
-                  <UserIcon className="h-4 w-4 text-ink-500" />
-                  <span className="font-medium truncate max-w-[140px]">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-ink-600 dark:text-ink-300">
+                  <UserIcon className="h-4 w-4" />
+                  <span className="font-medium truncate max-w-[120px]">
                     {user?.name}
                   </span>
                 </span>
@@ -106,17 +134,32 @@ export default function Navbar() {
             )}
           </div>
 
-          <button
-            className="lg:hidden p-2 rounded-lg hover:bg-ink-100"
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle menu"
-            aria-expanded={open}>
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          {/* Mobile right side */}
+          <div className="lg:hidden flex items-center gap-1">
+            <button
+              type="button"
+              onClick={toggle}
+              className="p-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800"
+              aria-label="Toggle theme">
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
+            <button
+              className="p-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+              aria-expanded={open}>
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
+        {/* Mobile menu */}
         {open && (
-          <nav className="lg:hidden border-t border-ink-100 py-3 space-y-1">
+          <nav className="lg:hidden border-t border-ink-200/70 dark:border-ink-800/70 py-3 space-y-1 animate-fade-in">
             {links.map((l) => (
               <NavLink
                 key={l.to}
@@ -126,8 +169,8 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
                     isActive
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-ink-700 hover:bg-ink-100"
+                      ? "bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
+                      : "text-ink-700 dark:text-ink-300 hover:bg-ink-100 dark:hover:bg-ink-800"
                   }`
                 }>
                 {l.to === "/admin" && <ShieldAlert className="h-3.5 w-3.5" />}
@@ -135,10 +178,10 @@ export default function Navbar() {
               </NavLink>
             ))}
 
-            <div className="pt-3 border-t border-ink-100 mt-3">
+            <div className="pt-3 border-t border-ink-200/70 dark:border-ink-800/70 mt-3">
               {isAuthenticated ? (
                 <div className="space-y-2">
-                  <div className="px-3 py-2 text-sm text-ink-700 inline-flex items-center gap-2">
+                  <div className="px-3 py-2 text-sm inline-flex items-center gap-2">
                     <UserIcon className="h-4 w-4 text-ink-500" />
                     <span className="font-medium">{user?.name}</span>
                   </div>

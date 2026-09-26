@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
@@ -45,207 +46,212 @@ function A({ children }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route element={<PublicLayout />}>
-          {/* Public */}
-          <Route path="/" element={<Home />} />
-          <Route path="/subjects" element={<Subjects />} />
-          <Route path="/subjects/:subjectId" element={<SubjectDetail />} />
-          <Route path="/topics/:subjectId/:topicId" element={<TopicDetail />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            {/* Public */}
+            <Route path="/" element={<Home />} />
+            <Route path="/subjects" element={<Subjects />} />
+            <Route path="/subjects/:subjectId" element={<SubjectDetail />} />
+            <Route
+              path="/topics/:subjectId/:topicId"
+              element={<TopicDetail />}
+            />
+            <Route path="/features" element={<Features />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
 
-          {/* Protected */}
+            {/* Protected */}
+            <Route
+              path="/dashboard"
+              element={
+                <P>
+                  <Dashboard />
+                </P>
+              }
+            />
+            <Route
+              path="/revision"
+              element={
+                <P>
+                  <Revision />
+                </P>
+              }
+            />
+            <Route
+              path="/ai-lab"
+              element={
+                <P>
+                  <AIStudyLab />
+                </P>
+              }
+            />
+            <Route
+              path="/question-bank"
+              element={
+                <P>
+                  <QuestionBank />
+                </P>
+              }
+            />
+            <Route
+              path="/question-bank/create"
+              element={
+                <P>
+                  <CreateQuestion />
+                </P>
+              }
+            />
+            <Route
+              path="/written-practice"
+              element={
+                <P>
+                  <WrittenPractice />
+                </P>
+              }
+            />
+            <Route
+              path="/my-pdfs"
+              element={
+                <P>
+                  <MyPdfs />
+                </P>
+              }
+            />
+            <Route
+              path="/pdf-workspace/:id"
+              element={
+                <P>
+                  <PdfWorkspace />
+                </P>
+              }
+            />
+
+            <Route
+              path="/practice/topic/:subjectId/:topicId"
+              element={
+                <P>
+                  <Practice />
+                </P>
+              }
+            />
+            <Route
+              path="/practice/subject/:subjectId"
+              element={
+                <P>
+                  <Practice />
+                </P>
+              }
+            />
+            <Route
+              path="/practice"
+              element={
+                <P>
+                  <Practice />
+                </P>
+              }
+            />
+            <Route
+              path="/practice/result"
+              element={
+                <P>
+                  <PracticeResult />
+                </P>
+              }
+            />
+
+            <Route
+              path="/exam"
+              element={
+                <P>
+                  <ExamBuilder />
+                </P>
+              }
+            />
+            <Route
+              path="/exam/run"
+              element={
+                <P>
+                  <ExamRunner />
+                </P>
+              }
+            />
+            <Route
+              path="/exam/result"
+              element={
+                <P>
+                  <ExamResult />
+                </P>
+              }
+            />
+
+            <Route
+              path="/progress"
+              element={
+                <P>
+                  <Progress />
+                </P>
+              }
+            />
+            <Route
+              path="/mistakes"
+              element={
+                <P>
+                  <MistakeBook />
+                </P>
+              }
+            />
+          </Route>
+
+          {/* Auth pages (own full-screen layout) */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Admin (own layout inside each page) */}
           <Route
-            path="/dashboard"
+            path="/admin"
             element={
-              <P>
-                <Dashboard />
-              </P>
+              <A>
+                <AdminDashboard />
+              </A>
             }
           />
           <Route
-            path="/revision"
+            path="/admin/users"
             element={
-              <P>
-                <Revision />
-              </P>
+              <A>
+                <AdminUsers />
+              </A>
             }
           />
           <Route
-            path="/ai-lab"
+            path="/admin/questions"
             element={
-              <P>
-                <AIStudyLab />
-              </P>
+              <A>
+                <AdminQuestions />
+              </A>
             }
           />
           <Route
-            path="/question-bank"
+            path="/admin/generations"
             element={
-              <P>
-                <QuestionBank />
-              </P>
+              <A>
+                <AdminGenerations />
+              </A>
             }
           />
           <Route
-            path="/question-bank/create"
+            path="/admin/materials"
             element={
-              <P>
-                <CreateQuestion />
-              </P>
-            }
-          />
-          <Route
-            path="/written-practice"
-            element={
-              <P>
-                <WrittenPractice />
-              </P>
-            }
-          />
-          <Route
-            path="/my-pdfs"
-            element={
-              <P>
-                <MyPdfs />
-              </P>
-            }
-          />
-          <Route
-            path="/pdf-workspace/:id"
-            element={
-              <P>
-                <PdfWorkspace />
-              </P>
+              <A>
+                <AdminMaterials />
+              </A>
             }
           />
 
-          <Route
-            path="/practice/topic/:subjectId/:topicId"
-            element={
-              <P>
-                <Practice />
-              </P>
-            }
-          />
-          <Route
-            path="/practice/subject/:subjectId"
-            element={
-              <P>
-                <Practice />
-              </P>
-            }
-          />
-          <Route
-            path="/practice"
-            element={
-              <P>
-                <Practice />
-              </P>
-            }
-          />
-          <Route
-            path="/practice/result"
-            element={
-              <P>
-                <PracticeResult />
-              </P>
-            }
-          />
-
-          <Route
-            path="/exam"
-            element={
-              <P>
-                <ExamBuilder />
-              </P>
-            }
-          />
-          <Route
-            path="/exam/run"
-            element={
-              <P>
-                <ExamRunner />
-              </P>
-            }
-          />
-          <Route
-            path="/exam/result"
-            element={
-              <P>
-                <ExamResult />
-              </P>
-            }
-          />
-
-          <Route
-            path="/progress"
-            element={
-              <P>
-                <Progress />
-              </P>
-            }
-          />
-          <Route
-            path="/mistakes"
-            element={
-              <P>
-                <MistakeBook />
-              </P>
-            }
-          />
-        </Route>
-
-        {/* Auth pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Admin (own layout) */}
-        <Route
-          path="/admin"
-          element={
-            <A>
-              <AdminDashboard />
-            </A>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <A>
-              <AdminUsers />
-            </A>
-          }
-        />
-        <Route
-          path="/admin/questions"
-          element={
-            <A>
-              <AdminQuestions />
-            </A>
-          }
-        />
-        <Route
-          path="/admin/generations"
-          element={
-            <A>
-              <AdminGenerations />
-            </A>
-          }
-        />
-        <Route
-          path="/admin/materials"
-          element={
-            <A>
-              <AdminMaterials />
-            </A>
-          }
-        />
-
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AuthProvider>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
