@@ -3,7 +3,8 @@
  * Automatically attaches access token and refreshes it if expired.
  */
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const STORAGE_KEYS = {
   access: "bcs_compass_access_token",
